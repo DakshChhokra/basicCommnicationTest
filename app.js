@@ -21,15 +21,7 @@ var sampleCommunication = {
 var log = new Schema({
     name: String,
     identifier: String,
-    messages: 
-    [
-        { 
-        user: String, 
-        event: String, 
-        dateString: String,
-        what: String
-        }
-    ]
+    messages: [sampleCommunication]
 });
 
 
@@ -93,19 +85,6 @@ io.sockets.on('connection', function(socket) {
     socket.on('message', (data) => {
         console.log(`${data.user} says: ${data.event} at ${data.time}`);
         console.log(`current data is ${data.user}, ${data.event}, ${data.time}`);
-        // Log.updateOne(
-        //     {identifier: currID}, 
-        //     {
-        //         $push: {messages: data}
-        //     },
-        //     (error, success) =>{
-        //         if (error){
-        //             console.log("Error!", err);
-        //         } else {
-        //             console.log("Success!", success);
-        //         }
-        //     }
-        //     );
 
         Log.findOneAndUpdate({identifier: currID}, 
             {$push: {messages: { 
@@ -158,19 +137,7 @@ async function serverResponse(event, currID) {
 
     console.log(`current data is ${dataPacket.user}, ${dataPacket.event}, ${dataPacket.time}`);
 
-    // Log.updateOne(
-    //     {identifier: currID}, 
-    //     {
-    //         $push: {messages: dataPacket}
-    //     },
-    //     (error, success) =>{
-    //         if (error){
-    //             console.log("Error!", err);
-    //         } else {
-    //             console.log("Success!", success);
-    //         }
-    //     }
-    // );
+
     Log.findOneAndUpdate({identifier: currID}, 
                     {$push: {messages: 
                         { 
@@ -205,10 +172,3 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-
-
-function millisToMinutesAndSeconds(millis) {
-  var minutes = Math.floor(millis / 60000);
-  var seconds = ((millis % 60000) / 1000).toFixed(0);
-  return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
-}

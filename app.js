@@ -10,6 +10,8 @@ const mongooseConfig = {
 
 mongoose.connect("mongodb://localhost:27017/basicComms", mongooseConfig);
 
+
+//mongoose set up
 var Schema = mongoose.Schema;
 
 var sampleCommunication = { 

@@ -32,7 +32,6 @@ socket.on('message', function(data) {
      console.log("User has disconnected");
  })
 
-//  socket.emit("connect");
 
 body.addEventListener("click", () => {
     if(body.classList.contains("black")){

@@ -11,7 +11,7 @@ const mongooseConfig = {
 var mongoDBPort = process.env.MONGODB_URI || "localhost:27017";
 console.log(mongoDBPort);
 
-mongoose.connect(`mongodb://${mongoDBPort}/basicComms`, mongooseConfig);
+mongoose.connect(MONGODB_URI, mongooseConfig);
 
 
 //mongoose set up

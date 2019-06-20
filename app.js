@@ -1,7 +1,41 @@
 const   express      = require("express"),
         app          = express(),
         bodyParser   = require('body-parser'),
-        socketio     = require("socket.io");
+        socketio     = require("socket.io"),
+        mongoose     = require("mongoose");
+
+const mongooseConfig = {
+    useNewUrlParser: true
+};
+
+mongoose.connect("mongodb://localhost:27017/basicComms", mongooseConfig);
+
+var Schema = mongoose.Schema;
+
+var sampleCommunication = { 
+    user: String, 
+    event: String, 
+    dateString: String
+};
+
+var log = new Schema({
+    name: String,
+    identifier: String,
+    messages: 
+    [
+        { 
+        user: String, 
+        event: String, 
+        dateString: String,
+        what: String
+        }
+    ]
+});
+
+
+var Log = mongoose.model("Log", log);
+
+
 
 
 
@@ -42,6 +76,8 @@ io.sockets.on('connection', function(socket) {
         console.log("Room join request on: " + room.id);
         currUser = room.user;
         currID = room.id;
+        Log.create({name: currUser, identifier: currID, messages: []});
+
         socket.join(room.id, () => {
             console.log("Server says: " + "Welcome, " + room.user + "! You succesfully joined room with the id " + room.id);
             var welcome = {
@@ -55,9 +91,37 @@ io.sockets.on('connection', function(socket) {
     
 
     socket.on('message', (data) => {
-        // console.log(data.user + " says : " + data.event + " at " + data.time);
         console.log(`${data.user} says: ${data.event} at ${data.time}`);
-        serverResponse(data.event);
+        console.log(`current data is ${data.user}, ${data.event}, ${data.time}`);
+        // Log.updateOne(
+        //     {identifier: currID}, 
+        //     {
+        //         $push: {messages: data}
+        //     },
+        //     (error, success) =>{
+        //         if (error){
+        //             console.log("Error!", err);
+        //         } else {
+        //             console.log("Success!", success);
+        //         }
+        //     }
+        //     );
+
+        Log.findOneAndUpdate({identifier: currID}, 
+            {$push: {messages: { 
+                user: data.user, 
+                event: data.event, 
+                dateString: data.time
+            }}}, 
+            {new: true}, (err, result) => {
+            // Rest of the action goes here
+            if (err){
+                console.log("Error!", err);
+            } else {
+                console.log("Success!", result);
+            }
+           });
+        serverResponse(data.event, currID);
     })
     
     socket.on('disconnect', (dis) => {
@@ -75,7 +139,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
   
-async function serverResponse(event) {
+async function serverResponse(event, currID) {
     var randomTime = getRandomInt(1, 10000);
     console.log(`####### Randomized server response time is: ${randomTime/1000}s ######`);
     await sleep(randomTime);
@@ -92,6 +156,36 @@ async function serverResponse(event) {
         dataPacket.event = "black to white"
     }
 
+    console.log(`current data is ${dataPacket.user}, ${dataPacket.event}, ${dataPacket.time}`);
+
+    // Log.updateOne(
+    //     {identifier: currID}, 
+    //     {
+    //         $push: {messages: dataPacket}
+    //     },
+    //     (error, success) =>{
+    //         if (error){
+    //             console.log("Error!", err);
+    //         } else {
+    //             console.log("Success!", success);
+    //         }
+    //     }
+    // );
+    Log.findOneAndUpdate({identifier: currID}, 
+                    {$push: {messages: 
+                        { 
+                            user: dataPacket.user, 
+                            event: dataPacket.event, 
+                            dateString: dataPacket.time
+                        }}}, 
+                    {new: true}, (err, result) => {
+                    // Rest of the action goes here
+                    if (err){
+                        console.log("Error!", err);
+                    } else {
+                        console.log("Success!", result);
+                    }
+                   });
     io.emit('message', dataPacket);
 
     console.log(`${dataPacket.user} says: ${dataPacket.event} at ${dataPacket.time}`);

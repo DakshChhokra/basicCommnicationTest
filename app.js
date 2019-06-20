@@ -8,7 +8,9 @@ const mongooseConfig = {
     useNewUrlParser: true
 };
 
-mongoose.connect("mongodb://localhost:27017/basicComms", mongooseConfig);
+var mongoDBPort = process.env.MONGODB_URI || "localhost:27017";
+
+mongoose.connect(`mongodb://${mongoDBPort}/basicComms`, mongooseConfig);
 
 
 //mongoose set up

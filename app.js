@@ -128,7 +128,7 @@ function sleep(ms) {
 }
   
 async function serverResponse(event, currID) {
-    var randomTime = getRandomInt(1, 10000);
+    var randomTime = getRandomInt(1, 5000);
     console.log(`####### Randomized server response time is: ${randomTime/1000}s ######`);
     await sleep(randomTime);
 

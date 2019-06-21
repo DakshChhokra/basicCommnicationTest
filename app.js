@@ -50,6 +50,10 @@ app.get("/", (req, res) => {
     res.render("index");
 })
 
+app.get("/admin", (req, res) => {
+    res.render("admin");
+})
+
 
 //Start Server
 var server = app.listen(port, () => {

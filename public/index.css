@@ -13,3 +13,9 @@ h1{
 body{
     padding-bottom: 100%;
 }
+
+.bottom-right{
+    width: 100px;
+    height: 50px;
+    background-color: orange; 
+}

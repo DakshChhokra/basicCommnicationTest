@@ -15,7 +15,9 @@ body{
 }
 
 .bottom-right{
-    width: 100px;
-    height: 50px;
-    background-color: orange; 
+	position: absolute;
+	top: 500px;
+	right: 50px;
+    width: 400px;
+    height: 250px;
 }

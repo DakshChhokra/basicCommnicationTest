@@ -1,5 +1,6 @@
 
 const body = document.querySelector("body");
+const bottomRight = document.querySelector(".bottom-right");
 var event = null;
 var user = prompt("Please enter your name");
 var room =  prompt("Please enter your id");
@@ -20,10 +21,16 @@ socket.on('message', function(data) {
     if(data.event == "black to white"){
         body.classList.remove("black");
         body.classList.add("white");
+
+        bottomRight.classList.remove("white");
+        bottomRight.classList.ådd("black");
         event = "white to black";
     } else if (data.event == "white to black"){
         body.classList.remove("white");
         body.classList.add("black") ;
+
+        bottomRight.classList.remove("black");
+        bottomRight.classList.ådd("white");
         event = "black to white";
     }
  });
@@ -37,10 +44,17 @@ body.addEventListener("click", () => {
     if(body.classList.contains("black")){
         body.classList.remove("black");
         body.classList.add("white");
+
+        bottomRight.classList.remove("white");
+        bottomRight.classList.ådd("black");
         event = "black to white";
     } else {
         body.classList.remove("white");
         body.classList.add("black") ;
+
+        bottomRight.classList.remove("black");
+        bottomRight.classList.ådd("white");
+
         event = "white to black";
     }
 

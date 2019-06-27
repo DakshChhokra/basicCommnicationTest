@@ -67,7 +67,6 @@ function getColor(id) {
 	return output;
 }
 
-//testing
 function addID(idInput, currentColorInput) {
 	sessionColorStorer.push({
 		id: idInput,

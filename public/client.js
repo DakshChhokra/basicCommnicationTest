@@ -17,7 +17,8 @@ socket.on('connect', function() {
 });
 
 socket.on('message', function(data) {
-    console.log('Incoming message:', data);
+    console.log(' %c Incoming message:', 'color: orange');
+	 console.table(data);
     if(data.event == "black to white"){
         body.classList.remove("black");
         body.classList.add("white");
@@ -64,7 +65,8 @@ body.addEventListener("click", () => {
         time: new Date().toISOString()
     };
 
-    console.log('Outgoing message:', data);
+    console.log('%c Outgoing message:', 'color: green');
+	 console.table(data);
     
     socket.emit("message", data);
 })

@@ -8,11 +8,13 @@ const mongooseConfig = {
     useNewUrlParser: true
 };
 
-var mongoDBPort = process.env.MONGODB_URI || "localhost:27017";
+var mongoDBPort = process.env.MONGODB_URI || "mongodb://localhost:27017/basicComms";
 console.log(mongoDBPort);
 
-mongoose.connect(process.env.MONGODB_URI, mongooseConfig);
+mongoose.connect(mongoDBPort, mongooseConfig);
+mongoose.set('useFindAndModify', false);
 
+var clientSideColor;
 
 //mongoose set up
 var Schema = mongoose.Schema;
@@ -20,7 +22,8 @@ var Schema = mongoose.Schema;
 var sampleCommunication = { 
     user: String, 
     event: String, 
-    dateString: String
+    dateString: String,
+    randomizedDelay: String
 };
 
 var log = new Schema({
@@ -46,13 +49,22 @@ app.use(express.static(__dirname + '/public'));
 
 
 //Routes
-app.get("/", (req, res) => {
+app.get("/communication", (req, res) => {
     res.render("index");
 })
 
 app.get("/admin", (req, res) => {
     res.render("admin");
 })
+
+app.get("/", (req, res) => {
+    res.render("login")
+})
+
+app.post("/", (req, res) => {
+    res.redirect("/communication")
+})
+
 
 
 //Start Server
@@ -92,24 +104,30 @@ io.sockets.on('connection', function(socket) {
     
 
     socket.on('message', (data) => {
-        console.log(`${data.user} says: ${data.event} at ${data.time}`);
-        console.log(`current data is ${data.user}, ${data.event}, ${data.time}`);
+        // console.log(`%c ${data.user} says: ${data.event} at ${data.time}`, 'color: orange');
+        console.table(data);
+        
 
         Log.findOneAndUpdate({identifier: currID}, 
             {$push: {messages: { 
                 user: data.user, 
                 event: data.event, 
-                dateString: data.time
+                dateString: data.time,
+                randomizedDelay: null
             }}}, 
             {new: true}, (err, result) => {
             // Rest of the action goes here
             if (err){
                 console.log("Error!", err);
-            } else {
-                console.log("Success!", result);
             }
            });
         serverResponse(data.event, currID);
+        
+    })
+
+    socket.on('color-update', (colorUpdate) => {
+        console.log(`Client updated color. Current color on client side is ${colorUpdate.color}`)
+        clientSideColor = colorUpdate.color;
     })
     
     socket.on('disconnect', (dis) => {
@@ -128,8 +146,8 @@ function sleep(ms) {
 }
   
 async function serverResponse(event, currID) {
-    var randomTime = getRandomInt(1, 5000);
-    console.log(`####### Randomized server response time is: ${randomTime/1000}s ######`);
+    var randomTime = getRandomInt(2000, 5000);
+    // console.log(`################################### Randomized server response time is: ${randomTime/1000}s ###########################`);
     await sleep(randomTime);
 
     var dataPacket = {
@@ -144,27 +162,26 @@ async function serverResponse(event, currID) {
         dataPacket.event = "black to white"
     }
 
-    console.log(`current data is ${dataPacket.user}, ${dataPacket.event}, ${dataPacket.time}`);
-
+    
 
     Log.findOneAndUpdate({identifier: currID}, 
                     {$push: {messages: 
                         { 
                             user: dataPacket.user, 
                             event: dataPacket.event, 
-                            dateString: dataPacket.time
+                            dateString: dataPacket.time,
+                            randomizedDelay: randomTime + "s"
                         }}}, 
                     {new: true}, (err, result) => {
                     // Rest of the action goes here
                     if (err){
                         console.log("Error!", err);
-                    } else {
-                        console.log("Success!", result);
                     }
                    });
     io.emit('message', dataPacket);
 
-    console.log(`${dataPacket.user} says: ${dataPacket.event} at ${dataPacket.time}`);
+    // console.log(`${dataPacket.user} says: ${dataPacket.event} at ${dataPacket.time}`);
+    console.table(dataPacket);
 }
 
 /**

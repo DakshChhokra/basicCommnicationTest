@@ -1,73 +1,80 @@
-
-const body = document.querySelector("body");
-const bottomRight = document.querySelector("div");
+const body = document.querySelector('body');
+const bottomRight = document.querySelector('div');
 var event = null;
-var user = prompt("Please enter your name");
-var room =  prompt("Please enter your id");
-
+var user = prompt('Please enter your name');
+var room = prompt('Please enter your id');
+var currentColor = 'black';
 
 // set-up a connection between the client and the server
 var socket = io.connect();
 
-
 socket.on('connect', function() {
-   // Connected, let's sign-up for to receive messages for this room
-   var input = {id: room, user: user};
-   socket.emit('room', input);
+	// Connected, let's sign-up for to receive messages for this room
+	var input = { id: room, user: user };
+	socket.emit('room', input);
 });
 
 socket.on('message', function(data) {
-    console.log('Incoming message:', data);
-    if(data.event == "black to white"){
-        body.classList.remove("black");
-        body.classList.add("white");
+	console.log(' %c Incoming message:', 'color: orange');
+	console.table(data);
 
-        bottomRight.classList.remove("white");
-        bottomRight.classList.add("black");
-        event = "white to black";
-    } else if (data.event == "white to black"){
-        body.classList.remove("white");
-        body.classList.add("black") ;
+	if (data.event == 'black to white') {
+		body.classList.remove('black');
+		body.classList.add('white');
 
-        bottomRight.classList.remove("black");
-        bottomRight.classList.add("white");
-        event = "black to white";
-    }
- });
+		bottomRight.classList.remove('white');
+		bottomRight.classList.add('black');
+		event = 'white to black';
+		currentColor = 'white';
+	} else if (data.event == 'white to black') {
+		body.classList.remove('white');
+		body.classList.add('black');
 
- socket.on('disconnect', () => {
-     console.log("User has disconnected");
- })
+		bottomRight.classList.remove('black');
+		bottomRight.classList.add('white');
+		event = 'black to white';
+		currentColor = 'black';
+	}
+	socket.emit('color-update', { color: currentColor });
+});
 
+socket.on('disconnect', () => {
+	console.log('User has disconnected');
+});
 
-body.addEventListener("click", () => {
-    if(body.classList.contains("black")){
-        body.classList.remove("black");
-        body.classList.add("white");
+socket.on('color-update', () => {
+	socket.emit('color-update', { color: currentColor });
+});
 
-        bottomRight.classList.remove("white");
-        bottomRight.classList.add("black");
-        event = "black to white";
-    } else {
-        body.classList.remove("white");
-        body.classList.add("black") ;
+body.addEventListener('click', () => {
+	if (body.classList.contains('black')) {
+		body.classList.remove('black');
+		body.classList.add('white');
 
-        bottomRight.classList.remove("black");
-        bottomRight.classList.add("white");
+		bottomRight.classList.remove('white');
+		bottomRight.classList.add('black');
+		event = 'black to white';
+		currentColor = 'white';
+	} else {
+		body.classList.remove('white');
+		body.classList.add('black');
 
-        event = "white to black";
-    }
+		bottomRight.classList.remove('black');
+		bottomRight.classList.add('white');
 
-    var data = {
-        user: user, 
-        event: event, 
-        time: new Date().toISOString()
-    };
+		event = 'white to black';
+		currentColor = 'black';
+	}
 
-    console.log('Outgoing message:', data);
-    
-    socket.emit("message", data);
-})
+	var data = {
+		user: user,
+		event: event,
+		time: new Date().toISOString()
+	};
 
+	console.log('%c Outgoing message:', 'color: green');
+	console.table(data);
 
-
+	socket.emit('message', data);
+	socket.emit('color-update', { color: currentColor });
+});

@@ -24,7 +24,7 @@ socket.on('message', function(data) {
 
 		bottomRight.classList.remove('white');
 		bottomRight.classList.add('black');
-		event = 'white to black';
+		event = 'black to white';
 		currentColor = 'white';
 	} else if (data.event == 'white to black') {
 		body.classList.remove('white');
@@ -32,7 +32,7 @@ socket.on('message', function(data) {
 
 		bottomRight.classList.remove('black');
 		bottomRight.classList.add('white');
-		event = 'black to white';
+		event = 'white to black';
 		currentColor = 'black';
 	}
 	socket.emit('color-update', { color: currentColor });
@@ -69,7 +69,9 @@ body.addEventListener('click', () => {
 	var data = {
 		user: user,
 		event: event,
-		time: new Date().toISOString()
+		currentColor: currentColor,
+		time: new Date().toISOString(),
+		randomizedDelay: null
 	};
 
 	console.log('%c Outgoing message:', 'color: green');

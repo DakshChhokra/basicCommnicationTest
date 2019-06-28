@@ -22,16 +22,16 @@ socket.on('message', function(data) {
 		body.classList.remove('black');
 		body.classList.add('white');
 
-		bottomRight.classList.remove('white');
-		bottomRight.classList.add('black');
+		// bottomRight.classList.remove('white');
+		// bottomRight.classList.add('black');
 		event = 'black to white';
 		currentColor = 'white';
 	} else if (data.event == 'white to black') {
 		body.classList.remove('white');
 		body.classList.add('black');
 
-		bottomRight.classList.remove('black');
-		bottomRight.classList.add('white');
+		// bottomRight.classList.remove('black');
+		// bottomRight.classList.add('white');
 		event = 'white to black';
 		currentColor = 'black';
 	}
@@ -47,20 +47,20 @@ socket.on('color-update', () => {
 });
 
 body.addEventListener('click', () => {
-	if (body.classList.contains('black')) {
-		body.classList.remove('black');
-		body.classList.add('white');
+	if (bottomRight.classList.contains('black')) {
+		bottomRight.classList.remove('black');
+		bottomRight.classList.add('white');
 
-		bottomRight.classList.remove('white');
-		bottomRight.classList.add('black');
+		// bottomRight.classList.remove('white');
+		// bottomRight.classList.add('black');
 		event = 'black to white';
 		currentColor = 'white';
 	} else {
-		body.classList.remove('white');
-		body.classList.add('black');
+		bottomRight.classList.remove('white');
+		bottomRight.classList.add('black');
 
-		bottomRight.classList.remove('black');
-		bottomRight.classList.add('white');
+		// bottomRight.classList.remove('black');
+		// bottomRight.classList.add('white');
 
 		event = 'white to black';
 		currentColor = 'black';

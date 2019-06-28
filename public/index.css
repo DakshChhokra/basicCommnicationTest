@@ -1,26 +1,27 @@
-.white{
-    background-color: white;
+.white {
+	background-color: white;
 }
 
-.black{
-    background-color: black;
+.black {
+	background-color: black;
 }
 
-h1{
-    color: aquamarine;
+h1 {
+	color: aquamarine;
 }
-h2{
-    color: orange;
-}
-
-body{
-    padding-bottom: 100%;
+h2 {
+	color: orange;
 }
 
-.bottom-right{
+body {
+	padding-bottom: 100%;
+}
+
+.bottom-right {
 	position: absolute;
 	top: 500px;
 	right: 50px;
-    width: 400px;
-    height: 250px;
+	width: 400px;
+	height: 250px;
+	border: thick solid #32a1ce;
 }

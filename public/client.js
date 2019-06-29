@@ -4,6 +4,7 @@ var event = null;
 var user = prompt('Please enter your name');
 var room = prompt('Please enter your id');
 var currentColor = 'black';
+var adversaryColor = 'white';
 
 // set-up a connection between the client and the server
 var socket = io.connect();
@@ -54,7 +55,7 @@ body.addEventListener('click', () => {
 		// bottomRight.classList.remove('white');
 		// bottomRight.classList.add('black');
 		event = 'black to white';
-		currentColor = 'white';
+		adversaryColor = 'white';
 	} else {
 		bottomRight.classList.remove('white');
 		bottomRight.classList.add('black');
@@ -63,13 +64,13 @@ body.addEventListener('click', () => {
 		// bottomRight.classList.add('white');
 
 		event = 'white to black';
-		currentColor = 'black';
+		adversaryColor = 'black';
 	}
 
 	var data = {
 		user: user,
 		event: event,
-		currentColor: currentColor,
+		currentColor: adversaryColor,
 		time: new Date().toISOString(),
 		randomizedDelay: null
 	};

@@ -79,5 +79,4 @@ body.addEventListener('click', () => {
 	console.table(data);
 
 	socket.emit('message', data);
-	socket.emit('color-update', { color: currentColor });
 });

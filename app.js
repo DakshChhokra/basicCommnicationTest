@@ -116,7 +116,6 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('message', (data) => {
-		// console.log(`%c ${data.user} says: ${data.event} at ${data.time}`, 'color: orange');
 		console.table(data);
 		Log.findOneAndUpdate(
 			{ identifier: currID },
@@ -140,10 +139,6 @@ io.sockets.on('connection', function(socket) {
 			}
 		);
 		serverResponse(currID);
-	});
-
-	socket.on('color-update', (colorUpdate) => {
-		updateColor(currID, colorUpdate.color);
 	});
 
 	socket.on('disconnect', (dis) => {
@@ -176,6 +171,8 @@ async function serverResponse(currID) {
 		dataPacket.event = 'black to white';
 		dataPacket.currentColor = 'white';
 	}
+
+	updateColor(currID, dataPacket.currentColor);
 
 	Log.findOneAndUpdate(
 		{ identifier: currID },

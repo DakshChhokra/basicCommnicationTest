@@ -23,20 +23,15 @@ socket.on('message', function(data) {
 		body.classList.remove('black');
 		body.classList.add('white');
 
-		// bottomRight.classList.remove('white');
-		// bottomRight.classList.add('black');
 		event = 'black to white';
 		currentColor = 'white';
 	} else if (data.event == 'white to black') {
 		body.classList.remove('white');
 		body.classList.add('black');
 
-		// bottomRight.classList.remove('black');
-		// bottomRight.classList.add('white');
 		event = 'white to black';
 		currentColor = 'black';
 	}
-	socket.emit('color-update', { color: currentColor });
 });
 
 socket.on('disconnect', () => {

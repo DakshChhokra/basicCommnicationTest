@@ -87,4 +87,3 @@ window.onbeforeunload = function(e) {
 	// For Safari
 	return 'Sure?';
 };
-// onClick="return confirm('Did you remember to download your form?');"

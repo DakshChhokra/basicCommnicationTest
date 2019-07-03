@@ -43,7 +43,22 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/', (req, res) => {
 	res.render('index');
+	// timerUntilOver(res);
 });
+
+app.get('survey', (req, res) => {
+	res.send('3 minutes of comms are over. Here is the survey');
+});
+
+//middleware?
+async function timerUntilOver(res) {
+	// await sleep(180000); //3 minutes
+	for (var i = 0; i < 4; i++) {
+		await sleep(10000);
+		console.log('10s have passed');
+	}
+	res.redirect('survey');
+}
 
 //Start Server
 var server = app.listen(port, () => {

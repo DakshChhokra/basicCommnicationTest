@@ -75,3 +75,16 @@ body.addEventListener('click', () => {
 
 	socket.emit('message', data);
 });
+
+window.onbeforeunload = function(e) {
+	e = e || window.event;
+
+	// For IE and Firefox prior to version 4
+	if (e) {
+		e.returnValue = 'Sure?';
+	}
+
+	// For Safari
+	return 'Sure?';
+};
+// onClick="return confirm('Did you remember to download your form?');"

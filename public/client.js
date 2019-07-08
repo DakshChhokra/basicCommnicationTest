@@ -87,3 +87,11 @@ window.onbeforeunload = function(e) {
 	// For Safari
 	return 'Sure?';
 };
+
+setTimeout(function() {
+	// after 2 seconds
+	window.location = `survey?name=${user}&identifier=${room}`;
+}, 3000);
+
+sessionStorage.setItem('username', user);
+sessionStorage.setItem('identifier', room);

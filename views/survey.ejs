@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <title>Post Experiment Debreif</title>
+    <link rel="stylesheet" href="/survey.css">
+    
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <h1>Post Experiment Debreif</h1>
+            
+            <h4>Congratulation on succesfully finishing the task. Now we have some questions for you.</h4>
+        </div>
+    
+    
+    
+        <form action="/survey" method="POST" id="mainForm">
+            <div class="form-group">
+                <label for="Comms1">Did you communicate with a human or a computer over the last few minutes? PLease do describe the reasoning which led to your conclusion</label>
+                <textarea type="text" class="form-control" rows="3" id="Comms1" name="Comms1" placeholder="Enter answer"></textarea>
+                <small id="emailHelp" class="form-text text-muted">You answer can be as descriptive or vague as you like</small>
+            </div>
+            <div class="form-group">
+                <label for="Comms2">Were you able to estabilish a form of communication with your partner(human or computer)? Do you think this communication is reproducible? Why or why not?</label>
+                <textarea type="text" class="form-control" rows="3" id="Comms2" name="Comms2" placeholder="Enter answer"></textarea>
+                <small id="emailHelp" class="form-text text-muted">You answer can be as descriptive or vague as you like</small>
+            </div>
+            <div class="form-group">
+                <label for="Comms3">Would you be interested in another longer debreif?</label>
+                <textarea type="text" class="form-control" rows="3" id="Comms3" name="Comms3" placeholder="Enter answer"></textarea>
+                <small id="emailHelp" class="form-text text-muted">You answer can be as descriptive or vague as you like</small>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                <label class="form-check-label" for="exampleCheck1">I have answered the above questions truthfully, without any embellishment and to the best of my ability.</label>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+    <script src="survey.js"></script>
+
+
+
+</body>
+</html>

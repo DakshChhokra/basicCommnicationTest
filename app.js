@@ -27,7 +27,8 @@ var sampleCommunication = {
 var log = new Schema({
 	name: String,
 	identifier: String,
-	messages: [ sampleCommunication ]
+	messages: [ sampleCommunication ],
+	debrief: [ String ]
 });
 
 var Log = mongoose.model('Log', log);
@@ -35,7 +36,10 @@ var Log = mongoose.model('Log', log);
 //config
 
 var port = process.env.PORT || 3000;
-app.use(bodyParser.urlencoded({ extended: false }));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 
@@ -46,19 +50,28 @@ app.get('/', (req, res) => {
 	// timerUntilOver(res);
 });
 
-app.get('survey', (req, res) => {
-	res.send('3 minutes of comms are over. Here is the survey');
+app.get('/survey', (req, res) => {
+	res.render('survey');
 });
 
-//middleware?
-async function timerUntilOver(res) {
-	// await sleep(180000); //3 minutes
-	for (var i = 0; i < 4; i++) {
-		await sleep(10000);
-		console.log('10s have passed');
-	}
-	res.redirect('survey');
-}
+app.post('/survey', (req, res) => {
+	console.log(req.body);
+	var debriefInput = [ req.body.Comms1, req.body.Comms2, req.body.Comms3 ];
+	Log.findOneAndUpdate(
+		{ identifier: req.body.identifier },
+		{
+			$set: { debrief: debriefInput }
+		},
+		{ new: true },
+		(err, result) => {
+			// Rest of the action goes here
+			if (err) {
+				console.log('Error!', err);
+			}
+		}
+	);
+	res.send('Thanks! You can close this tab now');
+});
 
 //Start Server
 var server = app.listen(port, () => {

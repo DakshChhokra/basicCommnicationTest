@@ -1,8 +1,8 @@
 const body = document.querySelector('body');
 const bottomRight = document.querySelector('div');
 var event = null;
-var user = prompt('Please enter your name');
-var room = prompt('Please enter your id');
+var user = sessionStorage.getItem('username');
+var room = sessionStorage.getItem('identifier');
 var currentColor = 'black';
 var adversaryColor = 'white';
 
@@ -76,22 +76,24 @@ body.addEventListener('click', () => {
 	socket.emit('message', data);
 });
 
+var timerChecker = true;
+
 window.onbeforeunload = function(e) {
-	e = e || window.event;
+	if (timerChecker) {
+		e = e || window.event;
 
-	// For IE and Firefox prior to version 4
-	if (e) {
-		e.returnValue = 'Sure?';
+		// For IE and Firefox prior to version 4
+		if (e) {
+			e.returnValue = 'Sure?';
+		}
+
+		// For Safari
+		return 'Sure?';
 	}
-
-	// For Safari
-	return 'Sure?';
 };
 
 setTimeout(function() {
-	// after 2 seconds
-	window.location = `survey?name=${user}&identifier=${room}`;
-}, 3000);
-
-sessionStorage.setItem('username', user);
-sessionStorage.setItem('identifier', room);
+	// after 180 seconds
+	timerChecker = false;
+	window.location = `survey`;
+}, 180000);

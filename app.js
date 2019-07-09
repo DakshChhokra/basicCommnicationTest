@@ -46,8 +46,11 @@ app.use(express.static(__dirname + '/public'));
 //Routes
 
 app.get('/', (req, res) => {
+	res.render('login');
+});
+
+app.get('/communication', (req, res) => {
 	res.render('index');
-	// timerUntilOver(res);
 });
 
 app.get('/survey', (req, res) => {
@@ -70,7 +73,7 @@ app.post('/survey', (req, res) => {
 			}
 		}
 	);
-	res.send('Thanks! You can close this tab now');
+	res.render('final');
 });
 
 //Start Server

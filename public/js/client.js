@@ -93,7 +93,7 @@ window.onbeforeunload = function(e) {
 };
 
 setTimeout(function() {
-	// after 180 seconds
+	// after 60 seconds
 	timerChecker = false;
 	window.location = `survey`;
-}, 180000);
+}, 60000);

@@ -22,7 +22,7 @@
         <form action="/survey" method="POST" id="mainForm">
             <div class="form-group">
                 <label for="Comms1">Did you communicate with a human or a computer over the last few minutes? Please do describe the reasoning which led to your conclusion</label>
-                <textarea type="text" class="form-control" rows="3" id="Comms1" name="Comms1" placeholder="Enter answer"></textarea>
+                <textarea required type="text" class="form-control" rows="3" id="Comms1" name="Comms1" placeholder="Enter answer"></textarea>
                 <small id="emailHelp" class="form-text text-muted">You answer can be as descriptive or vague as you like</small>
             </div>
             <div class="form-group">
@@ -32,14 +32,14 @@
             </div>
             <div class="form-group">
                 <label for="Comms3">Would you be interested in another longer debreif?</label>
-                <textarea type="text" class="form-control" rows="3" id="Comms3" name="Comms3" placeholder="Enter answer"></textarea>
+                <textarea required type="text" class="form-control" rows="3" id="Comms3" name="Comms3" placeholder="Enter answer"></textarea>
                 <small id="emailHelp" class="form-text text-muted">You answer can be as descriptive or vague as you like</small>
             </div>
             <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="exampleCheck1">
+                <input required type="checkbox" class="form-check-input" id="Check">
                 <label class="form-check-label" for="exampleCheck1">I have answered the above questions truthfully, without any embellishment and to the best of my ability.</label>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button id="button" type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
     <script src="js/survey.js"></script>

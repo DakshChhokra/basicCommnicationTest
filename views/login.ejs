@@ -22,23 +22,17 @@
         <form action="/communication" method="GET">
             <div class="form-group">
                 <label for="username">Name</label>
-                <input type="text" class="form-control" id="username" name="username" placeholder="Enter your name">
+                <input type="text" class="form-control" id="username" name="username" placeholder="Enter your name" required>
             </div>
             <div class="form-group">
                 <label for="identifier">Prolific Identification Number</label>
-                <input type="text" class="form-control" id="identifier" name="identifier" placeholder="ID">
+                <input type="text" class="form-control" id="identifier" name="identifier" placeholder="ID" required>
             </div>
     
-            <button onclick="store()" class="btn btn-primary">Start the Experiment</button>
+            <button onclick="store()" id="button" class="btn btn-primary">Start the Experiment</button>
     </div>
 
-    <script>
-        function store(){
-            
-            sessionStorage.setItem("username", document.getElementById("username").value);
-            sessionStorage.setItem("identifier", document.getElementById("identifier").value);
-        }
-    </script>
+    <script src="js/login.js"></script>
     
 </body>
 </html>

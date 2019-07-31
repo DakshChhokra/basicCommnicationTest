@@ -38,3 +38,11 @@ window.onbeforeunload = function(e) {
 		return 'Sure?';
 	}
 };
+
+function getAllOfSessionStorage() {
+	list = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
+	list.forEach((element) => {
+		var temp = JSON.parse(sessionStorage.getItem(element));
+		console.table(temp);
+	});
+}

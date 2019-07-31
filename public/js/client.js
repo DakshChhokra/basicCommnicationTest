@@ -6,6 +6,13 @@ var room = sessionStorage.getItem('identifier');
 var currentColor = 'black';
 var adversaryColor = 'white';
 
+var listOfMessages = [];
+var wrapper = {
+	list: listOfMessages
+};
+
+sessionStorage.setItem('listOfMessages', JSON.stringify(wrapper));
+
 // set-up a connection between the client and the server
 var socket = io.connect();
 
@@ -73,6 +80,8 @@ body.addEventListener('click', () => {
 	console.log('%c Outgoing message:', 'color: green');
 	console.table(data);
 
+	createNewEventInStorage(data);
+
 	socket.emit('message', data);
 });
 
@@ -96,4 +105,45 @@ setTimeout(function() {
 	// after 60 seconds
 	timerChecker = false;
 	window.location = `survey`;
-}, 60000);
+}, 10000);
+
+function appendToMessageList(newMessageName) {
+	temp = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
+	console.log('temp', temp);
+	temp.push(newMessageName);
+	var wrapper = {
+		list: temp
+	};
+	sessionStorage.setItem('listOfMessages', JSON.stringify(wrapper));
+}
+
+function createNewEventInStorage(eventJSON) {
+	sessionStorage.setItem(eventJSON.time, JSON.stringify(eventJSON));
+	appendToMessageList(eventJSON.time);
+}
+
+function getAllOfSessionStorage() {
+	list = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
+	list.forEach((element) => {
+		var temp = JSON.parse(sessionStorage.getItem(element));
+		console.table(temp);
+	});
+}
+
+function getMostRecentMessage() {
+	list = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
+	lastFile = list[list.length - 1];
+	var jsonFile = JSON.parse(sessionStorage.getItem(lastFile));
+	return jsonFile.time;
+	//returns in ISO DATE format
+}
+
+function compareToCurrentTime(lastTime) {
+	var currentTime = new Date().getTime();
+	var formattedLastTime = newDate(lastTime);
+	if (Math.abs(currentTime - formattedLastTime) > 2000) {
+		return true;
+	}
+}
+
+var intervalID = setInterval(recentMessageChecker, 5000);

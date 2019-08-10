@@ -92,6 +92,7 @@ body.addEventListener('click', () => {
 		console.log('bufferList[0]', lastTime);
 		console.log(compareTimes(lastTime, data.time));
 		data.delay = compareTimes(lastTime, data.time);
+		// data.delay = Math.ceil(compareTimes(lastTime, data.time) / 100) * 100;
 	}
 
 	console.log('%c Saving message:', 'color: blue');

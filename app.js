@@ -8,6 +8,8 @@ const mongooseConfig = {
 	useNewUrlParser: true
 };
 
+var buffer = [];
+
 var mongoDBPort = process.env.MONGODB_URI || 'mongodb://localhost:27017/basicComms';
 
 mongoose.connect(mongoDBPort, mongooseConfig);
@@ -21,7 +23,7 @@ var sampleCommunication = {
 	event: String,
 	currentColor: String,
 	dateString: String,
-	randomizedDelay: String
+	delay: String
 };
 
 var log = new Schema({
@@ -146,18 +148,107 @@ io.sockets.on('connection', function(socket) {
 		});
 	});
 
-	socket.on('message', (data) => {
-		console.table(data);
+	socket.on('message', (dataList) => {
+		dataList.forEach((element) => {
+			console.log(`Adding message from ${element.usert} at ${element.time}`);
+			element.id = currID;
+			console.table(element);
+			buffer.push(element);
+			let data = element;
+			Log.findOneAndUpdate(
+				{ identifier: currID },
+				{
+					$push: {
+						messages: {
+							user: data.user,
+							event: data.event,
+							currentColor: data.currentColor,
+							dateString: data.time,
+							delay: data.delay
+						}
+					}
+				},
+				{ new: true },
+				(err, result) => {
+					// Rest of the action goes here
+					if (err) {
+						console.log('Error!', err);
+					}
+				}
+			);
+		});
+
+		// serverResponse(currID);
+	});
+
+	socket.on('disconnect', (dis) => {
+		console.log('****************');
+		console.log(currUser + ' has left the room with id ' + currID + ' at ' + new Date().toISOString());
+		console.log('****************');
+	});
+});
+
+var intervalID = setInterval(intermediary, 2000);
+var flag = 'off';
+
+function intermediary() {
+	clearInterval(intervalID); //pause set Interval
+	flag = 'off';
+	checkBuffer();
+}
+
+function checkBuffer() {
+	if (buffer.length > 0) {
+		console.log('Buffer Is NOT Empty');
+		currentElement = buffer.shift();
+		processHead(currentElement);
+	} else if (buffer.length == 0) {
+		if (flag !== 'on') {
+			flag = 'on';
+			intervalID = setInterval(checkBuffer, 2000); //restart setInterval
+		}
+	}
+}
+// async function callAsync(currentElement) {
+// 	var x = await processHead(currentElement);
+// 	console.log(x);
+// 	checkBuffer();
+// }
+
+async function processHead(currentElement) {
+	preSleepTail = buffer[buffer.length - 1];
+	console.log(`Sleeping for ${currentElement.delay + 'ms'}`, 'color: orange');
+	await sleep(currentElement.delay);
+	console.log(`Sleep is done for ${currentElement.delay} ms`);
+	if (preSleepTail == buffer[buffer.length - 1]) {
+		var dataPacket = {
+			user: 'Server',
+			event: null,
+			currentColor: getColor(currentElement.id),
+			time: new Date().toISOString(),
+			delay: currentElement.delay + 'ms'
+		};
+
+		if (dataPacket.currentColor == 'white') {
+			dataPacket.event = 'white to black';
+			dataPacket.currentColor = 'black';
+		} else {
+			dataPacket.event = 'black to white';
+			dataPacket.currentColor = 'white';
+		}
+
+		updateColor(currentElement.id, dataPacket.currentColor);
+
 		Log.findOneAndUpdate(
-			{ identifier: currID },
+			{ identifier: currentElement.id },
 			{
 				$push: {
 					messages: {
-						user: data.user,
-						event: data.event,
-						currentColor: data.currentColor,
-						dateString: data.time,
-						randomizedDelay: data.randomizedDelay
+						user: dataPacket.user,
+						event: dataPacket.event,
+						currentColor: dataPacket.currentColor,
+						dateString: dataPacket.time,
+						delay: dataPacket.delay
 					}
 				}
 			},
@@ -169,67 +260,77 @@ io.sockets.on('connection', function(socket) {
 				}
 			}
 		);
-		serverResponse(currID);
-	});
+		io.emit('message', dataPacket);
 
-	socket.on('disconnect', (dis) => {
-		console.log('****************');
-		console.log(currUser + ' has left the room with id ' + currID + ' at ' + new Date().toISOString());
-		console.log('****************');
-	});
-});
+		console.table(dataPacket);
+		checkBuffer();
+	} else {
+		console.log('New input from user has interrupted output. Modifying buffer now.');
+		modifyBuffer(preSleepTail);
+	}
+}
+
+function modifyBuffer(preSleepTail) {
+	currel = buffer.shift();
+	while (currel != preSleepTail) {
+		currel = buffer.shift();
+	}
+	buffer.shift();
+	console.log(`Buffer is ${buffer}`);
+}
 
 function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function serverResponse(currID) {
-	var randomTime = getRandomInt(2000, 5000);
-	await sleep(randomTime);
+// async function serverResponse(currID) {
+// 	var randomTime = 3000;
+// 	//getRandomInt(2000, 5000);
+// 	await sleep(randomTime);
 
-	var dataPacket = {
-		user: 'Server',
-		event: null,
-		currentColor: getColor(currID),
-		time: new Date().toISOString(),
-		randomizedDelay: randomTime + 'ms'
-	};
+// 	var dataPacket = {
+// 		user: 'Server',
+// 		event: null,
+// 		currentColor: getColor(currID),
+// 		time: new Date().toISOString(),
+// 		delay: randomTime + 'ms'
+// 	};
 
-	if (dataPacket.currentColor == 'white') {
-		dataPacket.event = 'white to black';
-		dataPacket.currentColor = 'black';
-	} else {
-		dataPacket.event = 'black to white';
-		dataPacket.currentColor = 'white';
-	}
+// 	if (dataPacket.currentColor == 'white') {
+// 		dataPacket.event = 'white to black';
+// 		dataPacket.currentColor = 'black';
+// 	} else {
+// 		dataPacket.event = 'black to white';
+// 		dataPacket.currentColor = 'white';
+// 	}
 
-	updateColor(currID, dataPacket.currentColor);
+// 	updateColor(currID, dataPacket.currentColor);
 
-	Log.findOneAndUpdate(
-		{ identifier: currID },
-		{
-			$push: {
-				messages: {
-					user: dataPacket.user,
-					event: dataPacket.event,
-					currentColor: dataPacket.currentColor,
-					dateString: dataPacket.time,
-					randomizedDelay: dataPacket.randomizedDelay
-				}
-			}
-		},
-		{ new: true },
-		(err, result) => {
-			// Rest of the action goes here
-			if (err) {
-				console.log('Error!', err);
-			}
-		}
-	);
-	io.emit('message', dataPacket);
+// 	Log.findOneAndUpdate(
+// 		{ identifier: currID },
+// 		{
+// 			$push: {
+// 				messages: {
+// 					user: dataPacket.user,
+// 					event: dataPacket.event,
+// 					currentColor: dataPacket.currentColor,
+// 					dateString: dataPacket.time,
+// 					delay: dataPacket.delay
+// 				}
+// 			}
+// 		},
+// 		{ new: true },
+// 		(err, result) => {
+// 			// Rest of the action goes here
+// 			if (err) {
+// 				console.log('Error!', err);
+// 			}
+// 		}
+// 	);
+// 	io.emit('message', dataPacket);
 
-	console.table(dataPacket);
-}
+// 	console.table(dataPacket);
+// }
 
 /**
  * Returns a random integer between min (inclusive) and max (inclusive).

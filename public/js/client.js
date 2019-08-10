@@ -74,15 +74,30 @@ body.addEventListener('click', () => {
 		event: event,
 		currentColor: adversaryColor,
 		time: new Date().toISOString(),
-		randomizedDelay: null
+		delay: null
 	};
 
-	console.log('%c Outgoing message:', 'color: green');
+	console.log('Running Diagonsitics');
+	var bufferList = getList();
+	var bufflen = bufferList.length;
+
+	if (bufflen == 0) {
+		data.delay = 0;
+	} else {
+		lastTime = bufferList[bufflen - 1];
+		console.log(
+			`%c List is \n ${bufferList} \n with length ${bufflen} \n and last element is ${lastTime}`,
+			'color: orange'
+		);
+		console.log('bufferList[0]', lastTime);
+		console.log(compareTimes(lastTime, data.time));
+		data.delay = compareTimes(lastTime, data.time);
+	}
+
+	console.log('%c Saving message:', 'color: blue');
 	console.table(data);
 
 	createNewEventInStorage(data);
-
-	socket.emit('message', data);
 });
 
 var timerChecker = true;
@@ -105,7 +120,7 @@ setTimeout(function() {
 	// after 60 seconds
 	timerChecker = false;
 	window.location = `survey`;
-}, 10000);
+}, 180000);
 
 function appendToMessageList(newMessageName) {
 	temp = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
@@ -140,10 +155,50 @@ function getMostRecentMessage() {
 
 function compareToCurrentTime(lastTime) {
 	var currentTime = new Date().getTime();
-	var formattedLastTime = newDate(lastTime);
-	if (Math.abs(currentTime - formattedLastTime) > 2000) {
+	var formattedLastTime = new Date(lastTime);
+	console.log('fucccccck', Math.abs(currentTime - formattedLastTime));
+	if (Math.abs(currentTime - formattedLastTime) > 5000) {
 		return true;
 	}
 }
 
-var intervalID = setInterval(recentMessageChecker, 5000);
+function compareTimes(time1, time2) {
+	var time1mod = new Date(time1).getTime();
+	var time2mod = new Date(time2).getTime();
+	console.error(time1, 'bc', time2, 'bc', time1mod, 'bc', time2mod, 'bc', Math.abs(time1mod - time2mod));
+	return Math.abs(time1mod - time2mod);
+}
+
+function getList() {
+	return JSON.parse(sessionStorage.getItem('listOfMessages')).list;
+}
+
+function recentMessageChecker() {
+	console.log(JSON.parse(sessionStorage.getItem('listOfMessages')));
+	var someList = getList();
+	if (someList.length > 0) {
+		console.log('GETTING HERE BITCH');
+		if (compareToCurrentTime(getMostRecentMessage())) {
+			console.log('SENDING MESSAGE NOW');
+			list = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
+			var sendableList = [];
+			list.forEach((element) => {
+				var data = JSON.parse(sessionStorage.getItem(element));
+				console.log('%c Outgoing message:', 'color: green');
+				console.table(data);
+				sendableList.push(data);
+			});
+
+			socket.emit('message', sendableList);
+			var somelist = [];
+			var wrapperWax = {
+				list: somelist
+			};
+			sessionStorage.removeItem('listOfMessages');
+			sessionStorage.setItem('listOfMessages', JSON.stringify(wrapperWax));
+			console.log('LINE 171: ', sessionStorage.getItem('listOfMessages'));
+		}
+	}
+}
+
+var intervalID = setInterval(recentMessageChecker, 1000);

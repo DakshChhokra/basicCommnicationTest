@@ -150,7 +150,7 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('message', (dataList) => {
 		dataList.forEach((element) => {
-			console.log(`Adding message from ${element.usert} at ${element.time}`);
+			console.log(`Adding message from ${element.user} at ${element.time}`);
 			element.id = currID;
 			console.table(element);
 			buffer.push(element);
@@ -188,100 +188,83 @@ io.sockets.on('connection', function(socket) {
 	});
 });
 
-var intervalID = setTimeout(intermediary, 5000);
-var flag = 'off';
-
-function intermediary() {
-	clearInterval(intervalID); //pause set Interval
-	flag = 'off';
-	checkBuffer();
-	if (buffer.length == 0) {
-		var intervalID = setTimeout(intermediary, 5000);
-	}
-}
+var intervalID = setInterval(checkBuffer, 2000);
 
 function checkBuffer() {
-	if (buffer.length > 0) {
-		console.log('Buffer Is NOT Empty');
-		currentElement = buffer.shift();
-		processHead(currentElement);
+	if (buffer.length == 0) {
+		console.log(`Set Interval was just triggered at ${new Date()} and buffer is empty`);
+	} else {
+		clearInterval(intervalID); //pause interval at every 2s
+		processHead();
 	}
-	// else if (buffer.length == 0) {
-	// 	if (flag !== 'on') {
-	// 		flag = 'on';
-	// 		intervalID = setInterval(checkBuffer, 2000); //restart setInterval
-	// 	}
-	// }
 }
-// async function callAsync(currentElement) {
-// 	var x = await processHead(currentElement);
-// 	console.log(
-// 		'Await has finished. Is this callback? Calling checkbuffer after processing the msg with delay' +
-// 			currentElement.delay
-// 	);
-// 	checkBuffer();
-// }
 
-async function processHead(currentElement) {
-	preSleepTail = buffer[buffer.length - 1];
-	console.log(`Sleeping for ${currentElement.delay + 'ms'}`, 'color: orange');
-	var timeBeforeSleep = new Date().getTime();
-	await sleep(currentElement.delay).then(() => {
-		// Do something after the sleep!
+async function processHead() {
+	if (buffer.length > 0) {
+		var currentElement = buffer.shift();
+		preSleepTail = buffer[buffer.length - 1];
+		console.log(`Sleeping for ${currentElement.delay + 'ms'}`, 'color: orange');
+		var timeBeforeSleep = new Date().getTime();
+		await sleep(currentElement.delay);
 		var timeAfterSleep = new Date().getTime();
 		console.log(
 			`Sleep is done for ${timeAfterSleep -
 				timeBeforeSleep} ms. Sleep was supposed to be done for ${currentElement.delay} ms`
 		);
 		if (preSleepTail == buffer[buffer.length - 1]) {
-			var dataPacket = {
-				user: 'Server',
-				event: null,
-				currentColor: getColor(currentElement.id),
-				time: new Date().toISOString(),
-				delay: currentElement.delay + 'ms'
-			};
-
-			if (dataPacket.currentColor == 'white') {
-				dataPacket.event = 'white to black';
-				dataPacket.currentColor = 'black';
-			} else {
-				dataPacket.event = 'black to white';
-				dataPacket.currentColor = 'white';
-			}
-
-			updateColor(currentElement.id, dataPacket.currentColor);
-
-			Log.findOneAndUpdate(
-				{ identifier: currentElement.id },
-				{
-					$push: {
-						messages: {
-							user: dataPacket.user,
-							event: dataPacket.event,
-							currentColor: dataPacket.currentColor,
-							dateString: dataPacket.time,
-							delay: dataPacket.delay
-						}
-					}
-				},
-				{ new: true },
-				(err, result) => {
-					// Rest of the action goes here
-					if (err) {
-						console.log('Error!', err);
-					}
-				}
-			);
-			io.emit('message', dataPacket);
-
-			console.table(dataPacket);
+			updateAndSend(currentElement);
 		} else {
-			console.log('New input from user has interrupted output. Modifying buffer now.');
 			modifyBuffer(preSleepTail);
 		}
-		checkBuffer();
-	});
+		processHead();
+	} else {
+		intervalID = setInterval(checkBuffer, 2000); //restart interval
+	}
+}
+
+function updateAndSend(currentElement) {
+	var dataPacket = {
+		user: 'Server',
+		event: null,
+		currentColor: getColor(currentElement.id),
+		time: new Date().toISOString(),
+		delay: currentElement.delay + 'ms'
+	};
+
+	if (dataPacket.currentColor == 'white') {
+		dataPacket.event = 'white to black';
+		dataPacket.currentColor = 'black';
+	} else {
+		dataPacket.event = 'black to white';
+		dataPacket.currentColor = 'white';
+	}
+
+	updateColor(currentElement.id, dataPacket.currentColor);
+
+	Log.findOneAndUpdate(
+		{ identifier: currentElement.id },
+		{
+			$push: {
+				messages: {
+					user: dataPacket.user,
+					event: dataPacket.event,
+					currentColor: dataPacket.currentColor,
+					dateString: dataPacket.time,
+					delay: dataPacket.delay
+				}
+			}
+		},
+		{ new: true },
+		(err, result) => {
+			// Rest of the action goes here
+			if (err) {
+				console.log('Error!', err);
+			}
+		}
+	);
+	io.emit('message', dataPacket);
+
+	console.table(dataPacket);
 }
 
 function modifyBuffer(preSleepTail) {

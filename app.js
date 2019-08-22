@@ -8,8 +8,6 @@ const mongooseConfig = {
 	useNewUrlParser: true
 };
 
-var buffer = [];
-
 var mongoDBPort = process.env.MONGODB_URI || 'mongodb://localhost:27017/basicComms';
 
 mongoose.connect(mongoDBPort, mongooseConfig);
@@ -90,6 +88,90 @@ var sessionColorStorer = [
 	}
 ];
 
+var buffer = [
+	{
+		id: 'sampleID',
+		bufferArray: [ 'sampleMessage' ]
+	}
+];
+
+var intervalIDArray = [
+	{
+		id: 'sampleID',
+		intervalID: 'sampleID'
+	}
+];
+
+function startNewInterval(currID) {
+	let temp = setInterval(() => {
+		checkBuffer(currID);
+	}, 2000);
+	intervalIDArray.push({
+		id: currID,
+		intervalID: temp
+	});
+}
+
+function getIntervalID(id) {
+	var returnableID;
+	intervalIDArray.forEach((el) => {
+		if (el.id == id) {
+			returnableID = el.intervalID;
+		}
+	});
+	return returnableID;
+}
+
+function updateIntervalID(id) {
+	intervalIDArray.forEach((el) => {
+		if (el.id == id) {
+			el.intervalID = setInterval(() => {
+				checkBuffer(id);
+			}, 2000);
+		}
+	});
+}
+
+function createBuffer(currID) {
+	buffer.push({
+		id: currID,
+		bufferArray: []
+	});
+}
+
+function addToBuffer(id, message) {
+	buffer.forEach((el) => {
+		if (el.id == id) {
+			el.bufferArray.push(message);
+		}
+	});
+}
+
+function getHeadFromBuffer(id) {
+	var firstEl;
+	buffer.forEach((el) => {
+		if (el.id == id) {
+			firstEl = el.buffer.shift();
+		}
+	});
+	return firstEl;
+}
+
+function getBuffer(idInput) {
+	var returnJourney;
+	buffer.forEach((el) => {
+		if (el.id == idInput) {
+			returnJourney = el.bufferArray;
+		}
+	});
+	return returnJourney;
+}
+
+function printAllBuffersWithSize() {
+	buffer.forEach((el) => {
+		console.log(`Buffer of ${el.id} has size ${el.bufferArray.length}`);
+	});
+}
 function getColor(id) {
 	var output = null;
 	sessionColorStorer.forEach((element) => {
@@ -132,6 +214,8 @@ io.sockets.on('connection', function(socket) {
 		currID = room.id;
 
 		addID(currID, 'black');
+		createBuffer(currID);
+		startNewInterval(currID);
 
 		Log.create({ name: currUser, identifier: currID, messages: [] });
 
@@ -153,7 +237,7 @@ io.sockets.on('connection', function(socket) {
 			console.log(`Adding message from ${element.user} at ${element.time}`);
 			element.id = currID;
 			console.table(element);
-			buffer.push(element);
+			addToBuffer(element.id, element);
 			let data = element;
 			Log.findOneAndUpdate(
 				{ identifier: currID },
@@ -188,37 +272,37 @@ io.sockets.on('connection', function(socket) {
 	});
 });
 
-var intervalID = setInterval(checkBuffer, 2000);
-
-function checkBuffer() {
-	if (buffer.length == 0) {
-		console.log(`Set Interval was just triggered at ${new Date()} and buffer is empty`);
+function checkBuffer(id) {
+	var bufferArray1 = getBuffer(id);
+	if (bufferArray1.length == 0) {
+		// console.log(`Set Interval was just triggered at ${new Date()} and buffer is empty`);
 	} else {
-		clearInterval(intervalID); //pause interval at every 2s
-		processHead();
+		clearInterval(getIntervalID(id)); //pause interval at every 2s
+		processHead(id);
 	}
 }
 
-async function processHead() {
-	if (buffer.length > 0) {
-		var currentElement = buffer.shift();
-		preSleepTail = buffer[buffer.length - 1];
-		console.log(`Sleeping for ${currentElement.delay + 'ms'}`, 'color: orange');
-		var timeBeforeSleep = new Date().getTime();
+async function processHead(id) {
+	let specificBuffer = getBuffer(id);
+	if (specificBuffer.length > 0) {
+		let currentElement = specificBuffer.shift();
+		let preSleepTail = specificBuffer[specificBuffer.length - 1];
+		console.log(`Sleeping for ${currentElement.delay + 'ms'}`);
+		let timeBeforeSleep = new Date().getTime();
 		await sleep(currentElement.delay);
-		var timeAfterSleep = new Date().getTime();
+		let timeAfterSleep = new Date().getTime();
 		console.log(
 			`Sleep is done for ${timeAfterSleep -
 				timeBeforeSleep} ms. Sleep was supposed to be done for ${currentElement.delay} ms`
 		);
-		if (preSleepTail == buffer[buffer.length - 1]) {
+		if (preSleepTail == specificBuffer[specificBuffer.length - 1]) {
 			updateAndSend(currentElement);
 		} else {
-			modifyBuffer(preSleepTail);
+			modifyBuffer(specificBuffer, preSleepTail, id);
 		}
-		processHead();
+		processHead(id);
 	} else {
-		intervalID = setInterval(checkBuffer, 2000); //restart interval
+		updateIntervalID(id); //restart interval
 	}
 }
 
@@ -262,18 +346,33 @@ function updateAndSend(currentElement) {
 			}
 		}
 	);
-	io.emit('message', dataPacket);
+	// io.emit('message', dataPacket);
+	io.to(currentElement.id).emit('message', dataPacket);
 
 	console.table(dataPacket);
 }
 
-function modifyBuffer(preSleepTail) {
-	currel = buffer.shift();
-	while (currel != preSleepTail) {
-		currel = buffer.shift();
+function printEmergency(num) {
+	var count = num;
+	while (count > 0) {
+		console.log(
+			'#####################################################################################################################################'
+		);
+		count--;
 	}
-	buffer.shift();
-	console.log(`Buffer is ${buffer}`);
+}
+function modifyBuffer(bufferSpec, preSleepTail, id) {
+	printEmergency(5);
+	console.log('Interupption in buffer of ' + id);
+	currel = bufferSpec[0];
+	console.log('comparison: ', bufferSpec, getBuffer(id));
+	while (currel != preSleepTail) {
+		currel = bufferSpec.shift();
+	}
+	bufferSpec.shift();
+	console.log(`Buffer of ${id} is ${bufferSpec}`);
+	printAllBuffersWithSize();
+	printEmergency(5);
 }
 
 function sleep(ms) {

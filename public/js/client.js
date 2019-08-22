@@ -77,7 +77,6 @@ body.addEventListener('click', () => {
 		delay: null
 	};
 
-	console.log('Running Diagonsitics');
 	var bufferList = getList();
 	var bufflen = bufferList.length;
 
@@ -85,10 +84,7 @@ body.addEventListener('click', () => {
 		data.delay = 0;
 	} else {
 		lastTime = bufferList[bufflen - 1];
-		console.log(
-			`%c List is \n ${bufferList} \n with length ${bufflen} \n and last element is ${lastTime}`,
-			'color: orange'
-		);
+		console.log(`%c Buffer has length ${bufflen} \n and last element is ${lastTime}`, 'color: orange');
 		console.log('bufferList[0]', lastTime);
 		console.log(compareTimes(lastTime, data.time));
 		data.delay = compareTimes(lastTime, data.time);
@@ -121,7 +117,7 @@ setTimeout(function() {
 	// after 60 seconds
 	timerChecker = false;
 	window.location = `survey`;
-}, 180000);
+}, 1080000);
 
 function appendToMessageList(newMessageName) {
 	temp = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
@@ -157,7 +153,7 @@ function getMostRecentMessage() {
 function compareToCurrentTime(lastTime) {
 	var currentTime = new Date().getTime();
 	var formattedLastTime = new Date(lastTime);
-	console.log('fucccccck', Math.abs(currentTime - formattedLastTime));
+	console.log('wait time to prev message is:', Math.abs(currentTime - formattedLastTime));
 	if (Math.abs(currentTime - formattedLastTime) > 5000) {
 		return true;
 	}
@@ -166,7 +162,6 @@ function compareToCurrentTime(lastTime) {
 function compareTimes(time1, time2) {
 	var time1mod = new Date(time1).getTime();
 	var time2mod = new Date(time2).getTime();
-	console.error(time1, 'bc', time2, 'bc', time1mod, 'bc', time2mod, 'bc', Math.abs(time1mod - time2mod));
 	return Math.abs(time1mod - time2mod);
 }
 
@@ -175,10 +170,9 @@ function getList() {
 }
 
 function recentMessageChecker() {
-	console.log(JSON.parse(sessionStorage.getItem('listOfMessages')));
+	// console.log(JSON.parse(sessionStorage.getItem('listOfMessages')));
 	var someList = getList();
 	if (someList.length > 0) {
-		console.log('GETTING HERE BITCH');
 		if (compareToCurrentTime(getMostRecentMessage())) {
 			console.log('SENDING MESSAGE NOW');
 			list = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
@@ -197,7 +191,6 @@ function recentMessageChecker() {
 			};
 			sessionStorage.removeItem('listOfMessages');
 			sessionStorage.setItem('listOfMessages', JSON.stringify(wrapperWax));
-			console.log('LINE 171: ', sessionStorage.getItem('listOfMessages'));
 		}
 	}
 }

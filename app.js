@@ -33,6 +33,47 @@ var log = new Schema({
 
 var Log = mongoose.model('Log', log);
 
+var dashboard = new Schema({
+	serverSideCheckingFreq: Number,
+	totalExperimentLength: Number,
+	clientSideDelayBeforeProcessing: Number,
+	clientSideCheckingFrequency: Number
+
+});
+
+var Dashboard = mongoose.model('Dashboard', dashboard);
+
+
+function checkProgramVariableStatus() {
+	Dashboard.find({ serverSideCheckingFreq: { $gte: 0 }}, function (err, docs) {
+		if(err) {
+			console.error("error: ", err);
+		}
+		console.log("mongoose query is: " + docs + "\n length is :" + docs.length);
+		if(docs.length === 0) {
+			var programVariables = new Dashboard({
+				serverSideCheckingFreq: 2000,
+				totalExperimentLength: 180000,
+				clientSideDelayBeforeProcessing: 5000,
+				clientSideCheckingFrequency: 1000
+			})
+			
+			programVariables.save( (err, docsIn) => {
+				if (err) {
+					console.log("error!", err);
+				}
+
+				console.log("The just saved values are "  + docsIn);
+			})
+			console.log("Variables have now been set");
+		} else {
+			console.log("variables have already been instantiated");
+			console.log("One example val is " + docs[0].clientSideCheckingFrequency);
+		}
+	});
+}
+
+checkProgramVariableStatus();
 //config
 
 var port = process.env.PORT || 3000;

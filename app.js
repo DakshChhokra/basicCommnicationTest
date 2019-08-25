@@ -3,13 +3,12 @@ const express = require('express'),
 	bodyParser = require('body-parser'),
 	socketio = require('socket.io'),
 	mongoose = require('mongoose');
-	// env = require('node-env-file');
+	env = require('node-env-file');
 
 
 	
-// require('dotenv').config({path: path.resolve(__dirname+'/.env')});
 
-// env(__dirname + '/.env');
+env(__dirname + '/.env');
 
 const mongooseConfig = {
 	useNewUrlParser: true
@@ -50,6 +49,10 @@ var dashboard = new Schema({
 
 var Dashboard = mongoose.model('Dashboard', dashboard);
 
+var serverSideCheckingFreq;
+var totalExperimentLength;
+var clientSideDelayBeforeProcessing;
+var clientSideCheckingFrequency;
 
 function checkProgramVariableStatus() {
 	Dashboard.find({ serverSideCheckingFreq: { $gte: 0 }}, function (err, docs) {
@@ -64,6 +67,11 @@ function checkProgramVariableStatus() {
 				clientSideDelayBeforeProcessing: 5000,
 				clientSideCheckingFrequency: 1000
 			})
+
+			serverSideCheckingFreq = 2000;
+			totalExperimentLength = 180000;
+			clientSideDelayBeforeProcessing = 5000;
+			clientSideCheckingFrequency = 1000;
 			
 			programVariables.save( (err, docsIn) => {
 				if (err) {
@@ -75,12 +83,19 @@ function checkProgramVariableStatus() {
 			console.log("Variables have now been set");
 		} else {
 			console.log("variables have already been instantiated");
-			console.log("One example val is " + docs[0].clientSideCheckingFrequency);
+			serverSideCheckingFreq = docs[0].serverSideCheckingFreq;
+			totalExperimentLength = docs[0].totalExperimentLength
+			clientSideDelayBeforeProcessing = docs[0].clientSideDelayBeforeProcessing
+			clientSideCheckingFrequency = docs[0].clientSideCheckingFrequency
 		}
 	});
 }
 
 checkProgramVariableStatus();
+
+
+
+
 //config
 
 var port = process.env.PORT || 3000;
@@ -130,17 +145,69 @@ app.get('/dashboardLogin', (req, res) => {
 app.post('/dashboardLogin', authentication, (req, res) => {	
 	res.render('dashboard')
 })
-app.post('/dashboard', (req, res) => {
 
-})
+app.post('/dashboard', (req, res) => {
+	var progVars = [ 
+		req.body.serverSideCheckingFreq,
+		req.body.totalExperimentLength,
+		req.body.clientSideDelayBeforeProcessing,
+		req.body.clientSideCheckingFrequency
+	 ];
+
+	adminUpdateOfVars(progVars);
+	res.send("Thank you! Vars have been updated");
+});
+
+async function adminUpdateOfVars(progVars) {
+	if (progVars[0].length === 0) {
+		progVars[0] = serverSideCheckingFreq;
+	} else {
+		serverSideCheckingFreq = progVars[0];
+	}
+	if (progVars[1].length === 0) {
+		progVars[1] = totalExperimentLength;
+	} else {
+		totalExperimentLength = progVars[1];
+	}
+	if (progVars[2].length === 0) {
+		progVars[2] = clientSideDelayBeforeProcessing;
+	} else {
+		clientSideDelayBeforeProcessing = progVars[2];
+	}
+	if (progVars[3].length === 0) {
+		progVars[3] = clientSideCheckingFrequency;
+	} else {
+		clientSideCheckingFrequency = progVars[3];
+	}
+
+
+
+	const filter = { serverSideCheckingFreq: { $gte: 0 }};
+	const update = { 
+		serverSideCheckingFreq: progVars[0],
+		totalExperimentLength: progVars[1],
+		clientSideDelayBeforeProcessing: progVars[2],
+		clientSideCheckingFrequency: progVars[3]
+	};
+
+	// `doc` is the document _after_ `update` was applied because of`new: true`
+	let doc = await Dashboard.findOneAndUpdate(filter, update, { new: true});
+	console.log("Admin has updated values");
+	console.log(
+		"Values are: ", 
+		doc.serverSideCheckingFreq, 
+		doc.totalExperimentLength, 
+		doc.clientSideDelayBeforeProcessing, 
+		doc.clientSideCheckingFrequency)
+}
 
 function authentication(req, res, next){
 	//validate username and password
 	var isValid = check(req.body.username, req.body.password); //your validation function
 	if(isValid){
 	 next(); // valid password username combination
-	 } else {   
-	   res.status(401).send(); //Unauthorized
+	 } else {
+		res.redirect('/dashboardLogin'); //Unauthorized
 	 }    
 }
 
@@ -178,7 +245,7 @@ var intervalIDArray = [
 function startNewInterval(currID) {
 	let temp = setInterval(() => {
 		checkBuffer(currID);
-	}, 2000);
+	}, serverSideCheckingFreq);
 	intervalIDArray.push({
 		id: currID,
 		intervalID: temp
@@ -200,7 +267,7 @@ function updateIntervalID(id) {
 		if (el.id == id) {
 			el.intervalID = setInterval(() => {
 				checkBuffer(id);
-			}, 2000);
+			}, serverSideCheckingFreq);
 		}
 	});
 }
@@ -296,10 +363,19 @@ io.sockets.on('connection', function(socket) {
 			console.log(
 				'Server says: ' + 'Welcome, ' + room.user + '! You succesfully joined room with the id ' + room.id
 			);
+
+			var startUpVars = {
+				experimentLength: totalExperimentLength,
+				delayBeforeProcessing: clientSideDelayBeforeProcessing,
+				checkingFrequency: clientSideCheckingFrequency
+			}
+			
+			io.to(room.id).emit('startUp', startUpVars);
+
 			var welcome = {
 				user: 'Server',
 				event: 'Hallo! You are succefully connected to the room with the id ' + room.id,
-				time: new Date().toISOString()
+				time: new Date().toISOString(),
 			};
 			io.to(room.id).emit('message', welcome);
 		});

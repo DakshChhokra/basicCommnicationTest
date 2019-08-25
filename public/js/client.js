@@ -5,6 +5,9 @@ var user = sessionStorage.getItem('username');
 var room = sessionStorage.getItem('identifier');
 var currentColor = 'black';
 var adversaryColor = 'white';
+var experimentLength;
+var delayBeforeProcessing;
+var checkingFrequency;
 
 var listOfMessages = [];
 var wrapper = {
@@ -22,6 +25,23 @@ socket.on('connect', function() {
 	socket.emit('room', input);
 });
 
+socket.on('startUp', function(data) {
+	console.log('%c Start up variables have been recieved', 'color: magenta');
+	console.table(data);
+	experimentLength = data.experimentLength;
+	delayBeforeProcessing = data.delayBeforeProcessing;
+	checkingFrequency = data.checkingFrequency;
+
+	setTimeout(function() {
+		// after 60 seconds
+		timerChecker = false;
+		window.location = `survey`;
+	}, experimentLength);
+
+	var intervalID = setInterval(recentMessageChecker, checkingFrequency);
+
+
+})
 socket.on('message', function(data) {
 	console.log(' %c Incoming message:', 'color: orange');
 	console.table(data);
@@ -113,11 +133,7 @@ window.onbeforeunload = function(e) {
 	}
 };
 
-setTimeout(function() {
-	// after 60 seconds
-	timerChecker = false;
-	window.location = `survey`;
-}, 1080000);
+
 
 function appendToMessageList(newMessageName) {
 	temp = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
@@ -154,7 +170,7 @@ function compareToCurrentTime(lastTime) {
 	var currentTime = new Date().getTime();
 	var formattedLastTime = new Date(lastTime);
 	console.log('wait time to prev message is:', Math.abs(currentTime - formattedLastTime));
-	if (Math.abs(currentTime - formattedLastTime) > 5000) {
+	if (Math.abs(currentTime - formattedLastTime) > delayBeforeProcessing) {
 		return true;
 	}
 }
@@ -195,4 +211,3 @@ function recentMessageChecker() {
 	}
 }
 
-var intervalID = setInterval(recentMessageChecker, 1000);

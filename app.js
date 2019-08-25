@@ -3,12 +3,12 @@ const express = require('express'),
 	bodyParser = require('body-parser'),
 	socketio = require('socket.io'),
 	mongoose = require('mongoose');
-	env = require('node-env-file');
+	// env = require('node-env-file');
 
 
 	
 
-env(__dirname + '/.env');
+// env(__dirname + '/.env');
 
 const mongooseConfig = {
 	useNewUrlParser: true
@@ -369,7 +369,7 @@ io.sockets.on('connection', function(socket) {
 				delayBeforeProcessing: clientSideDelayBeforeProcessing,
 				checkingFrequency: clientSideCheckingFrequency
 			}
-			
+
 			io.to(room.id).emit('startUp', startUpVars);
 
 			var welcome = {

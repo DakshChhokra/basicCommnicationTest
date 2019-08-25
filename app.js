@@ -162,22 +162,22 @@ async function adminUpdateOfVars(progVars) {
 	if (progVars[0].length === 0) {
 		progVars[0] = serverSideCheckingFreq;
 	} else {
-		serverSideCheckingFreq = progVars[0];
+		serverSideCheckingFreq = parseInt(progVars[0], 10);
 	}
 	if (progVars[1].length === 0) {
 		progVars[1] = totalExperimentLength;
 	} else {
-		totalExperimentLength = progVars[1];
+		totalExperimentLength = parseInt(progVars[1], 10);
 	}
 	if (progVars[2].length === 0) {
 		progVars[2] = clientSideDelayBeforeProcessing;
 	} else {
-		clientSideDelayBeforeProcessing = progVars[2];
+		clientSideDelayBeforeProcessing = parseInt(progVars[2], 10);
 	}
 	if (progVars[3].length === 0) {
 		progVars[3] = clientSideCheckingFrequency;
 	} else {
-		clientSideCheckingFrequency = progVars[3];
+		clientSideCheckingFrequency = parseInt(progVars[3], 10);
 	}
 
 

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dashboard</title>
+    <script src="/js/dashboard.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="jumbotron">
+            <h1 class="text-success">Dashboard</h1>
+        </div>
+    
+        <form action="/dashboard" method="POST">
+            <div class="form-group">
+                <label for="serverSideCheckingFreq">serverSideCheckingFreq</label>
+                <input type="number" class="form-control" id="serverSideCheckingFreq" name="serverSideCheckingFreq" placeholder="Enter serverSideCheckingFreq in ms">
+            </div>
+            <div class="form-group">
+                <label for="totalExperimentLength">totalExperimentLength</label>
+                <input type="number" class="form-control" id="totalExperimentLength" name="totalExperimentLength" placeholder="Enter totalExperimentLength in ms">
+            </div>
+            <div class="form-group">
+                <label for="clientSideDelayBeforeProcessing">clientSideDelayBeforeProcessing</label>
+                <input type="number" class="form-control" id="clientSideDelayBeforeProcessing" name="clientSideDelayBeforeProcessing" placeholder="Enter clientSideDelayBeforeProcessing in ms">
+            </div>
+            <div class="form-group">
+                <label for="clientSideCheckingFrequency">clientSideCheckingFrequency</label>
+                <input type="number" class="form-control" id="clientSideCheckingFrequency" name="clientSideCheckingFrequency" placeholder="Enter clientSideCheckingFrequency in ms">
+            </div>
+    
+            <button id="button" class="btn btn-primary">Submit changes</button>
+    </div>
+
+</body>
+</html>

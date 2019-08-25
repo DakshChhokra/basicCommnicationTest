@@ -3,6 +3,13 @@ const express = require('express'),
 	bodyParser = require('body-parser'),
 	socketio = require('socket.io'),
 	mongoose = require('mongoose');
+	env = require('node-env-file');
+
+
+	
+// require('dotenv').config({path: path.resolve(__dirname+'/.env')});
+
+env(__dirname + '/.env');
 
 const mongooseConfig = {
 	useNewUrlParser: true
@@ -116,7 +123,32 @@ app.post('/survey', (req, res) => {
 	);
 	res.render('final');
 });
+app.get('/dashboardLogin', (req, res) => {
+	res.render('dashboardLogin');
+})
 
+app.post('/dashboardLogin', authentication, (req, res) => {	
+	res.render('dashboard')
+})
+app.post('/dashboard', (req, res) => {
+
+})
+
+function authentication(req, res, next){
+	//validate username and password
+	var isValid = check(req.body.username, req.body.password); //your validation function
+	if(isValid){
+	 next(); // valid password username combination
+	 } else {   
+	   res.status(401).send(); //Unauthorized
+	 }    
+}
+
+function check(username, password) {
+	console.log(process.env.USERNAME , username);
+	console.log(process.env.PASSWORD , password);
+	return (process.env.USERNAME === username && process.env.PASSWORD === password);
+}
 //Start Server
 var server = app.listen(port, () => {
 	console.log('Server started on port ' + port);

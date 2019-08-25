@@ -3,13 +3,13 @@ const express = require('express'),
 	bodyParser = require('body-parser'),
 	socketio = require('socket.io'),
 	mongoose = require('mongoose');
-	env = require('node-env-file');
+	// env = require('node-env-file');
 
 
 	
 // require('dotenv').config({path: path.resolve(__dirname+'/.env')});
 
-env(__dirname + '/.env');
+// env(__dirname + '/.env');
 
 const mongooseConfig = {
 	useNewUrlParser: true

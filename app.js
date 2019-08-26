@@ -378,7 +378,7 @@ io.sockets.on('connection', function(socket) {
 				time: new Date().toISOString(),
 			};
 			io.to(room.id).emit('message', welcome);
-			io.to(room.id).emit('keep-alive');
+			io.to(room.id).emit('keep-alive', currID);
 		});
 	});
 
@@ -422,9 +422,9 @@ io.sockets.on('connection', function(socket) {
 		socket.disconnect();
 	});
 
-	socket.on('keep-alive', () => {
-		io.to(room.id).emit('keep-alive');
-		console.log(`Keeping ${room.id} alive right now`);
+	socket.on('keep-alive', (currID) => {
+		io.to(room.id).emit('keep-alive', currID);
+		console.log(`Keeping ${currID} alive right now`);
 	})
 });
 

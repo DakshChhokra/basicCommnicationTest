@@ -378,6 +378,7 @@ io.sockets.on('connection', function(socket) {
 				time: new Date().toISOString(),
 			};
 			io.to(room.id).emit('message', welcome);
+			io.to(room.id).emit('keep-alive');
 		});
 	});
 

@@ -69,9 +69,9 @@ socket.on('color-update', () => {
 	socket.emit('color-update', { color: currentColor });
 });
 
-socket.on('keep-alive', () => {
+socket.on('keep-alive', (currID) => {
 	setTimeout(() => {
-		socket.emit('keep-alive');
+		socket.emit('keep-alive', currID);
 		console.log("Keeping alive")
 	}, 5000)
 })

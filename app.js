@@ -423,6 +423,7 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('keep-alive', (currID) => {
+		console.log("currID", currID);
 		io.to(currID).emit('keep-alive', currID);
 		console.log(`Keeping ${currID} alive right now`);
 	})
@@ -521,7 +522,7 @@ function modifyBuffer(bufferSpec, preSleepTail, id) {
 	printEmergency(5);
 	console.log('Interupption in buffer of ' + id);
 	currel = bufferSpec[0];
-	console.log('comparison: ', bufferSpec, getBuffer(id));
+	// console.log('comparison: ', bufferSpec, getBuffer(id));
 	while (currel != preSleepTail) {
 		currel = bufferSpec.shift();
 	}

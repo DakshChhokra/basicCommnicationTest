@@ -518,7 +518,7 @@ function modifyBuffer(bufferSpec, preSleepTail, id) {
 	while (currel != preSleepTail) {
 		currel = bufferSpec.shift();
 	}
-	bufferSpec.shift();
+	// bufferSpec.shift();
 	printAllBuffersWithSize();
 	console.log('#####################################################################################################################################')
 }

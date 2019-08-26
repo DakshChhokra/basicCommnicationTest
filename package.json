@@ -14,8 +14,8 @@
   "devDependencies": {},
   "scripts": {
     "start": "node app.js",
-    "build": "npm start"
+    "build": "webpack"
   },
-  "author": "",
+  "author": "Daksh Chhokra",
   "license": "ISC"
 }

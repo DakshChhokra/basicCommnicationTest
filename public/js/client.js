@@ -73,7 +73,7 @@ socket.on('keep-alive', () => {
 	setTimeout(() => {
 		socket.emit('keep-alive');
 		console.log("Keeping alive")
-	}, 50000)
+	}, 5000)
 })
 
 body.addEventListener('click', () => {

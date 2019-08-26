@@ -509,15 +509,7 @@ function updateAndSend(currentElement) {
 	console.table(dataPacket);
 }
 
-function printEmergency(num) {
-	var count = num;
-	while (count > 0) {
-		console.log(
-			'#####################################################################################################################################'
-		);
-		count--;
-	}
-}
+
 function modifyBuffer(bufferSpec, preSleepTail, id) {
 	printEmergency(5);
 	console.log('Interupption in buffer of ' + id);
@@ -528,8 +520,6 @@ function modifyBuffer(bufferSpec, preSleepTail, id) {
 	}
 	bufferSpec.shift();
 	console.log(`Buffer of ${id} is ${bufferSpec}`);
-	printAllBuffersWithSize();
-	printEmergency(5);
 }
 
 function sleep(ms) {

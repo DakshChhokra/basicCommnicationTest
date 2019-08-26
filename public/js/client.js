@@ -69,6 +69,13 @@ socket.on('color-update', () => {
 	socket.emit('color-update', { color: currentColor });
 });
 
+socket.on('keep-alive', () => {
+	setTimeout(() => {
+		socket.emit('keep-alive');
+		console.log("Keeping alive")
+	}, 50000)
+})
+
 body.addEventListener('click', () => {
 	if (bottomRight.classList.contains('black')) {
 		bottomRight.classList.remove('black');

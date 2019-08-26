@@ -420,6 +420,11 @@ io.sockets.on('connection', function(socket) {
 		console.log('****************');
 		socket.disconnect();
 	});
+
+	socket.on('keep-alive', () => {
+		io.to(room.id).emit('keep-alive');
+		console.log(`Keeping ${room.id} alive right now`);
+	})
 });
 
 function checkBuffer(id) {

@@ -519,7 +519,6 @@ function modifyBuffer(bufferSpec, preSleepTail, id) {
 		currel = bufferSpec.shift();
 	}
 	bufferSpec.shift();
-	console.log(`Buffer of ${id} is ${bufferSpec}`);
 	printAllBuffersWithSize();
 	console.log('#####################################################################################################################################')
 }

@@ -1,4 +1,4 @@
-alert('WORKS');
+
 function clearSessionStorage() {
 	list = Object.keys(sessionStorage);
 	list.forEach((element) => {

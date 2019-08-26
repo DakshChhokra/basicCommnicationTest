@@ -423,7 +423,7 @@ io.sockets.on('connection', function(socket) {
 	});
 
 	socket.on('keep-alive', (currID) => {
-		io.to(room.id).emit('keep-alive', currID);
+		io.to(currID).emit('keep-alive', currID);
 		console.log(`Keeping ${currID} alive right now`);
 	})
 });

@@ -511,7 +511,6 @@ function updateAndSend(currentElement) {
 
 
 function modifyBuffer(bufferSpec, preSleepTail, id) {
-	printEmergency(5);
 	console.log('Interupption in buffer of ' + id);
 	currel = bufferSpec[0];
 	// console.log('comparison: ', bufferSpec, getBuffer(id));

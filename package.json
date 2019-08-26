@@ -14,7 +14,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "node app.js",
-    "build": "node app.js"
+    "build": "npm install"
   },
   "author": "",
   "license": "ISC"

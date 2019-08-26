@@ -509,8 +509,17 @@ function updateAndSend(currentElement) {
 	console.table(dataPacket);
 }
 
-
+function printEmergency(num) {
+	var count = num;
+	while (count > 0) {
+		console.log(
+			'#####################################################################################################################################'
+		);
+		count--;
+	}
+}
 function modifyBuffer(bufferSpec, preSleepTail, id) {
+	console.log('#####################################################################################################################################'
 	console.log('Interupption in buffer of ' + id);
 	currel = bufferSpec[0];
 	// console.log('comparison: ', bufferSpec, getBuffer(id));
@@ -519,6 +528,8 @@ function modifyBuffer(bufferSpec, preSleepTail, id) {
 	}
 	bufferSpec.shift();
 	console.log(`Buffer of ${id} is ${bufferSpec}`);
+	printAllBuffersWithSize();
+	console.log('#####################################################################################################################################'
 }
 
 function sleep(ms) {

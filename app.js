@@ -418,6 +418,7 @@ io.sockets.on('connection', function(socket) {
 		console.log('****************');
 		console.log(currUser + ' has left the room with id ' + currID + ' at ' + new Date().toISOString());
 		console.log('****************');
+		socket.disconnect();
 	});
 });
 

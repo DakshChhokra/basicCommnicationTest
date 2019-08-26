@@ -131,6 +131,7 @@ window.onbeforeunload = function(e) {
 		// For Safari
 		return 'Sure?';
 	}
+	socket.disconnect();
 };
 
 

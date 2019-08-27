@@ -1,31 +1,25 @@
-const	express = require('express'),
-		app = express(),
-		bodyParser = require('body-parser'),
-		socketio = require('socket.io'),
-		mongoose = require('mongoose');
-	//Uncomment the following line to run this on local
-		// env = require('node-env-file');
+const express = require('express'),
+	app = express(),
+	bodyParser = require('body-parser'),
+	socketio = require('socket.io'),
+	mongoose = require('mongoose');
+//Uncomment the following line to run this on local
+// env = require('node-env-file');
 
-
-
-	
 //Uncomment the following line to run this on local
 // env(__dirname + '/.env');
 
-//Add USERNAME, PASSWORD and MONGODB URI vars to your local .env file
-
-
+//Add USERNAME, PASSWORD and MONGODB URI vars to your local .env file and use process.env to call it
 
 //mongoose set up
 const mongooseConfig = {
 	useNewUrlParser: true
 };
 
-var mongoDBPort = process.env.MONGODB_URI || 'mongodb://localhost:27017/basicComms'; 
+var mongoDBPort = process.env.MONGODB_URI || 'mongodb://localhost:27017/basicComms';
 
 mongoose.connect(mongoDBPort, mongooseConfig);
 mongoose.set('useFindAndModify', false);
-
 
 var Schema = mongoose.Schema;
 
@@ -51,7 +45,6 @@ var dashboard = new Schema({
 	totalExperimentLength: Number,
 	clientSideDelayBeforeProcessing: Number,
 	clientSideCheckingFrequency: Number
-
 });
 
 var Dashboard = mongoose.model('Dashboard', dashboard);
@@ -68,46 +61,43 @@ var clientSideCheckingFrequency;
 	If record exists it simply pulls the values and updates the local values. 
  */
 function checkProgramVariableStatus() {
-	Dashboard.find({ serverSideCheckingFreq: { $gte: 0 }}, function (err, docs) {
-		if(err) {
-			console.error("error: ", err);
+	Dashboard.find({ serverSideCheckingFreq: { $gte: 0 } }, function(err, docs) {
+		if (err) {
+			console.error('error: ', err);
 		}
-		console.log("mongoose query is: " + docs + "\n length is :" + docs.length);
-		if(docs.length === 0) {
+		console.log('mongoose query is: ' + docs + '\n length is :' + docs.length);
+		if (docs.length === 0) {
 			var programVariables = new Dashboard({
 				serverSideCheckingFreq: 2000,
 				totalExperimentLength: 180000,
 				clientSideDelayBeforeProcessing: 5000,
 				clientSideCheckingFrequency: 1000
-			})
+			});
 
 			serverSideCheckingFreq = 2000;
 			totalExperimentLength = 180000;
 			clientSideDelayBeforeProcessing = 5000;
 			clientSideCheckingFrequency = 1000;
-			
-			programVariables.save( (err, docsIn) => {
+
+			programVariables.save((err, docsIn) => {
 				if (err) {
-					console.log("error!", err);
+					console.log('error!', err);
 				}
 
-				console.log("The just saved values are "  + docsIn);
-			})
-			console.log("Variables have now been set");
+				console.log('The just saved values are ' + docsIn);
+			});
+			console.log('Variables have now been set');
 		} else {
-			console.log("variables have already been instantiated");
+			console.log('variables have already been instantiated');
 			serverSideCheckingFreq = docs[0].serverSideCheckingFreq;
-			totalExperimentLength = docs[0].totalExperimentLength
-			clientSideDelayBeforeProcessing = docs[0].clientSideDelayBeforeProcessing
-			clientSideCheckingFrequency = docs[0].clientSideCheckingFrequency
+			totalExperimentLength = docs[0].totalExperimentLength;
+			clientSideDelayBeforeProcessing = docs[0].clientSideDelayBeforeProcessing;
+			clientSideCheckingFrequency = docs[0].clientSideCheckingFrequency;
 		}
 	});
 }
 
 checkProgramVariableStatus();
-
-
-
 
 //Express config
 
@@ -153,22 +143,22 @@ app.post('/survey', (req, res) => {
 });
 app.get('/dashboardLogin', (req, res) => {
 	res.render('dashboardLogin');
-})
+});
 
-app.post('/dashboardLogin', authentication, (req, res) => {	
-	res.render('dashboard')
-})
+app.post('/dashboardLogin', authentication, (req, res) => {
+	res.render('dashboard');
+});
 
 app.post('/dashboard', (req, res) => {
-	var progVars = [ 
+	var progVars = [
 		req.body.serverSideCheckingFreq,
 		req.body.totalExperimentLength,
 		req.body.clientSideDelayBeforeProcessing,
 		req.body.clientSideCheckingFrequency
-	 ];
+	];
 
 	adminUpdateOfVars(progVars);
-	res.send("Thank you! Vars have been updated");
+	res.send('Thank you! Vars have been updated');
 });
 
 /**
@@ -197,10 +187,8 @@ async function adminUpdateOfVars(progVars) {
 		clientSideCheckingFrequency = parseInt(progVars[3], 10);
 	}
 
-
-
-	const filter = { serverSideCheckingFreq: { $gte: 0 }};
-	const update = { 
+	const filter = { serverSideCheckingFreq: { $gte: 0 } };
+	const update = {
 		serverSideCheckingFreq: progVars[0],
 		totalExperimentLength: progVars[1],
 		clientSideDelayBeforeProcessing: progVars[2],
@@ -208,41 +196,39 @@ async function adminUpdateOfVars(progVars) {
 	};
 
 	// `doc` is the document _after_ `update` was applied because of`new: true`
-	let doc = await Dashboard.findOneAndUpdate(filter, update, { new: true});
-	console.log("Admin has updated values");
+	let doc = await Dashboard.findOneAndUpdate(filter, update, { new: true });
+	console.log('Admin has updated values');
 	console.log(
-		"Values are: ", 
-		doc.serverSideCheckingFreq, 
-		doc.totalExperimentLength, 
-		doc.clientSideDelayBeforeProcessing, 
-		doc.clientSideCheckingFrequency)
+		'Values are: ',
+		doc.serverSideCheckingFreq,
+		doc.totalExperimentLength,
+		doc.clientSideDelayBeforeProcessing,
+		doc.clientSideCheckingFrequency
+	);
 }
 
 /**
 	Middleware for the password-protected dashboard page
  */
-function authentication(req, res, next){
+function authentication(req, res, next) {
 	//validate username and password
 	var isValid = check(req.body.username, req.body.password); //your validation function
-	if(isValid){
-	 next(); // valid password username combination
-	 } else {
+	if (isValid) {
+		next(); // valid password username combination
+	} else {
 		res.redirect('/dashboardLogin'); //Unauthorized
-	 }    
+	}
 }
-
-
 
 /**
 	Authenticates the login information presented on the Dashboard Login page. It queries the .env file on the local copy and secret variables 
 	in the hosted version for the correct username and password.
  */
 function check(username, password) {
-	console.log(process.env.USERNAME , username);
-	console.log(process.env.PASSWORD , password);
-	return (process.env.USERNAME === username && process.env.PASSWORD === password);
+	console.log(process.env.USERNAME, username);
+	console.log(process.env.PASSWORD, password);
+	return process.env.USERNAME === username && process.env.PASSWORD === password;
 }
-
 
 //End of Express Routes
 
@@ -425,7 +411,6 @@ function deleteFromAllThreeStores(id) {
 			intervalIDArray.splice(i, 1);
 		}
 	}
-
 }
 
 // attach Socket.io to our HTTP server
@@ -457,14 +442,14 @@ io.sockets.on('connection', function(socket) {
 				experimentLength: totalExperimentLength,
 				delayBeforeProcessing: clientSideDelayBeforeProcessing,
 				checkingFrequency: clientSideCheckingFrequency
-			}
+			};
 
 			io.to(room.id).emit('startUp', startUpVars);
 
 			var welcome = {
 				user: 'Server',
 				event: 'Hallo! You are succefully connected to the room with the id ' + room.id,
-				time: new Date().toISOString(),
+				time: new Date().toISOString()
 			};
 			io.to(room.id).emit('message', welcome);
 			io.to(room.id).emit('keep-alive', currID);
@@ -514,10 +499,10 @@ io.sockets.on('connection', function(socket) {
 
 	//A keep alive signal sent every 10 seconds to stop Heroku from closing the session and throwing a H-12-503 error
 	socket.on('keep-alive', (currID) => {
-		console.log("currID", currID);
+		console.log('currID', currID);
 		io.to(currID).emit('keep-alive', currID);
 		console.log(`Keeping ${currID} alive right now`);
-	})
+	});
 });
 
 /**
@@ -619,7 +604,9 @@ function updateAndSend(currentElement) {
 	and preserves all the new data.
  */
 function modifyBuffer(bufferSpec, preSleepTail, id) {
-	console.log('#####################################################################################################################################')
+	console.log(
+		'#####################################################################################################################################'
+	);
 	console.log('Interupption in buffer of ' + id);
 	currel = bufferSpec[0];
 	// console.log('comparison: ', bufferSpec, getBuffer(id));
@@ -628,7 +615,9 @@ function modifyBuffer(bufferSpec, preSleepTail, id) {
 	}
 	// bufferSpec.shift();
 	printAllBuffersWithSize();
-	console.log('#####################################################################################################################################')
+	console.log(
+		'#####################################################################################################################################'
+	);
 }
 
 /**
@@ -637,4 +626,3 @@ function modifyBuffer(bufferSpec, preSleepTail, id) {
 function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
-

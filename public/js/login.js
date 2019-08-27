@@ -1,3 +1,6 @@
+/**
+	Stores the users credentials in session storage so that it can be accesed from any page.
+ */
 function store() {
 	sessionStorage.setItem('username', document.getElementById('username').value);
 	sessionStorage.setItem('identifier', document.getElementById('identifier').value);

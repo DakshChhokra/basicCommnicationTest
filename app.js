@@ -1,25 +1,32 @@
-const express = require('express'),
-	app = express(),
-	bodyParser = require('body-parser'),
-	socketio = require('socket.io'),
-	mongoose = require('mongoose');
-	// env = require('node-env-file');
+const	express = require('express'),
+		app = express(),
+		bodyParser = require('body-parser'),
+		socketio = require('socket.io'),
+		mongoose = require('mongoose');
+	//Uncomment the following line to run this on local
+		// env = require('node-env-file');
+
 
 
 	
-
+//Uncomment the following line to run this on local
 // env(__dirname + '/.env');
 
+//Add USERNAME, PASSWORD and MONGODB URI vars to your local .env file
+
+
+
+//mongoose set up
 const mongooseConfig = {
 	useNewUrlParser: true
 };
 
-var mongoDBPort = process.env.MONGODB_URI || 'mongodb://localhost:27017/basicComms';
+var mongoDBPort = process.env.MONGODB_URI || 'mongodb://localhost:27017/basicComms'; 
 
 mongoose.connect(mongoDBPort, mongooseConfig);
 mongoose.set('useFindAndModify', false);
 
-//mongoose set up
+
 var Schema = mongoose.Schema;
 
 var sampleCommunication = {
@@ -49,11 +56,17 @@ var dashboard = new Schema({
 
 var Dashboard = mongoose.model('Dashboard', dashboard);
 
+//These are the variables which the experiment runner can change. When the server is started this variables pull their values from the database.
+
 var serverSideCheckingFreq;
 var totalExperimentLength;
 var clientSideDelayBeforeProcessing;
 var clientSideCheckingFrequency;
 
+/**
+	Queries the database for the value of 4 program variables. If the record doesn't exist this method creates the document with default values.
+	If record exists it simply pulls the values and updates the local values. 
+ */
 function checkProgramVariableStatus() {
 	Dashboard.find({ serverSideCheckingFreq: { $gte: 0 }}, function (err, docs) {
 		if(err) {
@@ -96,7 +109,7 @@ checkProgramVariableStatus();
 
 
 
-//config
+//Express config
 
 var port = process.env.PORT || 3000;
 
@@ -158,6 +171,10 @@ app.post('/dashboard', (req, res) => {
 	res.send("Thank you! Vars have been updated");
 });
 
+/**
+	This method checks if the admin wants to update all variables or just a select few.
+	Then it simply update these values in the MongoDB database and then refreshes the values of the local copies of those variables.
+ */
 async function adminUpdateOfVars(progVars) {
 	if (progVars[0].length === 0) {
 		progVars[0] = serverSideCheckingFreq;
@@ -201,6 +218,9 @@ async function adminUpdateOfVars(progVars) {
 		doc.clientSideCheckingFrequency)
 }
 
+/**
+	Middleware for the password-protected dashboard page
+ */
 function authentication(req, res, next){
 	//validate username and password
 	var isValid = check(req.body.username, req.body.password); //your validation function
@@ -211,16 +231,35 @@ function authentication(req, res, next){
 	 }    
 }
 
+
+
+/**
+	Authenticates the login information presented on the Dashboard Login page. It queries the .env file on the local copy and secret variables 
+	in the hosted version for the correct username and password.
+ */
 function check(username, password) {
 	console.log(process.env.USERNAME , username);
 	console.log(process.env.PASSWORD , password);
 	return (process.env.USERNAME === username && process.env.PASSWORD === password);
 }
+
+
+//End of Express Routes
+
 //Start Server
 var server = app.listen(port, () => {
 	console.log('Server started on port ' + port);
 });
 
+/**
+	sessionColorStorer, buffer and intervalIDArray are 3 local dictionaries which are stored when the server is up. These are used to query some information
+	about a client while they are collected. 
+	
+	* sessionColorStorer stores the current color at any given moment for the client's screen. 
+	* buffer stores an array for every connected client identifiable by an id. The buffer contains all the recieved but yet unprocessed message from the client
+	* intervalIDArray stores key value pairs where the key is the id and values is the intervalID for that particular client
+
+ */
 var sessionColorStorer = [
 	{
 		id: 'sampleID',
@@ -241,7 +280,9 @@ var intervalIDArray = [
 		intervalID: 'sampleID'
 	}
 ];
-
+/**
+	Called when the client connects. Starts an interval which checks the buffer every (var: serverSideCheckingFreq) seconds
+ */
 function startNewInterval(currID) {
 	let temp = setInterval(() => {
 		checkBuffer(currID);
@@ -252,6 +293,9 @@ function startNewInterval(currID) {
 	});
 }
 
+/**
+	Queries the dictioanry of key value pairs with the id and return the interval id.
+ */
 function getIntervalID(id) {
 	var returnableID;
 	intervalIDArray.forEach((el) => {
@@ -262,6 +306,9 @@ function getIntervalID(id) {
 	return returnableID;
 }
 
+/**
+	Used to restart intervals once the processing of the buffer has finished.
+ */
 function updateIntervalID(id) {
 	intervalIDArray.forEach((el) => {
 		if (el.id == id) {
@@ -271,7 +318,9 @@ function updateIntervalID(id) {
 		}
 	});
 }
-
+/**
+	Creates a new key value pair in Buffer, where the key is the id and the value is the actual buffer which is initiated as an empty array here.
+ */
 function createBuffer(currID) {
 	buffer.push({
 		id: currID,
@@ -279,6 +328,9 @@ function createBuffer(currID) {
 	});
 }
 
+/** 
+	Add a new entry to the buffer attached to the given ID.
+ */
 function addToBuffer(id, message) {
 	buffer.forEach((el) => {
 		if (el.id == id) {
@@ -287,6 +339,9 @@ function addToBuffer(id, message) {
 	});
 }
 
+/**
+	Get the first element of buffer given an id.
+ */
 function getHeadFromBuffer(id) {
 	var firstEl;
 	buffer.forEach((el) => {
@@ -297,6 +352,9 @@ function getHeadFromBuffer(id) {
 	return firstEl;
 }
 
+/**
+	Get the buffer array from the buffer dictionary given a particular ID.
+ */
 function getBuffer(idInput) {
 	var returnJourney;
 	buffer.forEach((el) => {
@@ -307,11 +365,17 @@ function getBuffer(idInput) {
 	return returnJourney;
 }
 
+/**
+	Print the size of all the buffers along with the ID associated with them. Used for logging/debugging.
+ */
 function printAllBuffersWithSize() {
 	buffer.forEach((el) => {
 		console.log(`Buffer of ${el.id} has size ${el.bufferArray.length}`);
 	});
 }
+/**
+	Get the current color from a client given an ID. Queries sessionColorStorer.
+ */
 function getColor(id) {
 	var output = null;
 	sessionColorStorer.forEach((element) => {
@@ -321,13 +385,18 @@ function getColor(id) {
 	});
 	return output;
 }
-
+/**
+	Used to instantiate an entry in sessionColorStorer when a new Client joins.
+ */
 function addID(idInput, currentColorInput) {
 	sessionColorStorer.push({
 		id: idInput,
 		currentColor: currentColorInput
 	});
 }
+/**
+	Used to update the color in sessionColorStorer when the client changes their color.
+ */
 function updateColor(id, currentColor) {
 	sessionColorStorer.forEach((element) => {
 		if (element.id == id) {
@@ -336,15 +405,34 @@ function updateColor(id, currentColor) {
 	});
 }
 
+/**
+	This method is called when a user disconnects from the server. This method deletes the key value pairs which contain the id as the key from 
+	sessionColorStorer, buffer and intervalIDArray
+ */
+function deleteFromAllThreeStores(id) {
+	for (var i = 0; i < sessionColorStorer.length; i++) {
+		if (sessionColorStorer[i].id == id) {
+			sessionColorStorer.splice(i, 1);
+		}
+	}
+	for (var i = 0; i < buffer.length; i++) {
+		if (buffer[i].id == id) {
+			buffer.splice(i, 1);
+		}
+	}
+	for (var i = 0; i < intervalIDArray.length; i++) {
+		if (intervalIDArray[i].id == id) {
+			intervalIDArray.splice(i, 1);
+		}
+	}
+
+}
+
 // attach Socket.io to our HTTP server
 var io = socketio.listen(server);
 // handle incoming connections from clients
 io.sockets.on('connection', function(socket) {
-	// once a client has connected, we expect to get a ping from them saying what room they want to join
-	console.log('****************');
-	console.log('New incoming connection');
-	console.log('****************');
-
+	console.log('****************', '\n New incoming connection', '\n ****************');
 	var currID = null,
 		currUser = null;
 
@@ -359,6 +447,7 @@ io.sockets.on('connection', function(socket) {
 
 		Log.create({ name: currUser, identifier: currID, messages: [] });
 
+		//housekeeping actions when a client joins
 		socket.join(room.id, () => {
 			console.log(
 				'Server says: ' + 'Welcome, ' + room.user + '! You succesfully joined room with the id ' + room.id
@@ -382,6 +471,7 @@ io.sockets.on('connection', function(socket) {
 		});
 	});
 
+	//Transmits events fromt the client to the server
 	socket.on('message', (dataList) => {
 		dataList.forEach((element) => {
 			console.log(`Adding message from ${element.user} at ${element.time}`);
@@ -404,24 +494,25 @@ io.sockets.on('connection', function(socket) {
 				},
 				{ new: true },
 				(err, result) => {
-					// Rest of the action goes here
 					if (err) {
 						console.log('Error!', err);
 					}
 				}
 			);
 		});
-
-		// serverResponse(currID);
 	});
 
+	//Housekeeping when the client leaves the room. Stops the interval which checks the buffers and call the delete method for the 3 key-value pair dictionaries.
 	socket.on('disconnect', (dis) => {
 		console.log('****************');
 		console.log(currUser + ' has left the room with id ' + currID + ' at ' + new Date().toISOString());
 		console.log('****************');
 		socket.disconnect();
+		clearInterval(getIntervalID(currID));
+		deleteFromAllThreeStores(currID);
 	});
 
+	//A keep alive signal sent every 10 seconds to stop Heroku from closing the session and throwing a H-12-503 error
 	socket.on('keep-alive', (currID) => {
 		console.log("currID", currID);
 		io.to(currID).emit('keep-alive', currID);
@@ -429,6 +520,11 @@ io.sockets.on('connection', function(socket) {
 	})
 });
 
+/**
+	This is the method called every (var: serverSideCheckingFreq) seconds as a part of the setInterval. It checks whethe there is any data in the buffer or not.
+	If there is no data the method is called again in (var: serverSideCheckingFreq) seconds.
+	If there is data it sent for processing to processHead.
+ */
 function checkBuffer(id) {
 	var bufferArray1 = getBuffer(id);
 	if (bufferArray1.length == 0) {
@@ -439,6 +535,12 @@ function checkBuffer(id) {
 	}
 }
 
+/**
+	This is an asynchronous function which processes the entire buffer of a client. It takes the head, reads the message, composes the response, and then
+	sleeps for the requisite amount of time. After waking up it checks to see if nothing has been added to the buffer while the method was sleeping. 
+	If nothing has been added it recursively calls itself to further process the buffer.
+	If something has been added we call modifyBuffer().
+ */
 async function processHead(id) {
 	let specificBuffer = getBuffer(id);
 	if (specificBuffer.length > 0) {
@@ -463,6 +565,9 @@ async function processHead(id) {
 	}
 }
 
+/**
+	Method called within processHead to actually compose a response to an incoming message, add it to the database and then send it to the client.
+ */
 function updateAndSend(currentElement) {
 	var dataPacket = {
 		user: 'Server',
@@ -509,7 +614,10 @@ function updateAndSend(currentElement) {
 	console.table(dataPacket);
 }
 
-
+/**
+	Called if something is added to the buffer while the head of the buffer was still being processed. It deletes everything which was a part of the previous transmission
+	and preserves all the new data.
+ */
 function modifyBuffer(bufferSpec, preSleepTail, id) {
 	console.log('#####################################################################################################################################')
 	console.log('Interupption in buffer of ' + id);
@@ -523,20 +631,10 @@ function modifyBuffer(bufferSpec, preSleepTail, id) {
 	console.log('#####################################################################################################################################')
 }
 
+/**
+	Actual function which is used to stop processing. It is called within the async function so that it does not block the event loop.
+ */
 function sleep(ms) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/**
- * Returns a random integer between min (inclusive) and max (inclusive).
- * The value is no lower than min (or the next integer greater than min
- * if min isn't an integer) and no greater than max (or the next integer
- * lower than max if max isn't an integer).
- * Using Math.round() will give you a non-uniform distribution!
- */
-
-function getRandomInt(min, max) {
-	min = Math.ceil(min);
-	max = Math.floor(max);
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}

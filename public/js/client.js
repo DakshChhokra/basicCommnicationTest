@@ -142,7 +142,9 @@ window.onbeforeunload = function(e) {
 };
 
 
-
+/**
+	Add events to the localStarage buffer by parsing string to array, pushing item and then converting back to String for storage.
+ */
 function appendToMessageList(newMessageName) {
 	temp = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
 	console.log('temp', temp);
@@ -152,12 +154,17 @@ function appendToMessageList(newMessageName) {
 	};
 	sessionStorage.setItem('listOfMessages', JSON.stringify(wrapper));
 }
-
+/**
+	Create event in local storage
+ */
 function createNewEventInStorage(eventJSON) {
 	sessionStorage.setItem(eventJSON.time, JSON.stringify(eventJSON));
 	appendToMessageList(eventJSON.time);
 }
 
+/**
+	Used for daignostic purposes to look through the contents of local storage.
+ */
 function getAllOfSessionStorage() {
 	list = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
 	list.forEach((element) => {
@@ -166,6 +173,9 @@ function getAllOfSessionStorage() {
 	});
 }
 
+/**
+	Get the time of the last message in local storage.
+ */
 function getMostRecentMessage() {
 	list = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
 	lastFile = list[list.length - 1];
@@ -174,6 +184,9 @@ function getMostRecentMessage() {
 	//returns in ISO DATE format
 }
 
+/**
+	Get the amount of time that has passed since a message was added to buffer in the local storage.
+ */
 function compareToCurrentTime(lastTime) {
 	var currentTime = new Date().getTime();
 	var formattedLastTime = new Date(lastTime);
@@ -183,6 +196,9 @@ function compareToCurrentTime(lastTime) {
 	}
 }
 
+/**
+	Compare the times and return the difference in ms.
+ */
 function compareTimes(time1, time2) {
 	var time1mod = new Date(time1).getTime();
 	var time2mod = new Date(time2).getTime();
@@ -193,6 +209,9 @@ function getList() {
 	return JSON.parse(sessionStorage.getItem('listOfMessages')).list;
 }
 
+/**
+	Check the most recent message. If it has been a certain amounf of time, emit all messages in the buffer to the server.
+ */
 function recentMessageChecker() {
 	// console.log(JSON.parse(sessionStorage.getItem('listOfMessages')));
 	var someList = getList();

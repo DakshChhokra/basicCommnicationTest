@@ -38,7 +38,9 @@ window.onbeforeunload = function(e) {
 		return 'Sure?';
 	}
 };
-
+/**
+	Used for diagnostic purposes to read all the data in session storage.
+ */
 function getAllOfSessionStorage() {
 	list = JSON.parse(sessionStorage.getItem('listOfMessages')).list;
 	list.forEach((element) => {
